@@ -7,7 +7,7 @@
   "centres": [
     {
       "name": "TP",
-      "colour": "#1A73E8",
+      "colour": "#3b82f6",
       "metrics": {
         "SIS": { "current": 78, "previous": 77 },
         "IFSR": { "current": 85, "previous": 86 },
@@ -16,7 +16,7 @@
     },
     {
       "name": "WNS",
-      "colour": "#F57C00",
+      "colour": "#f59e0b",
       "metrics": {
         "SIS": { "current": 85, "previous": 83 },
         "IFSR": { "current": 79, "previous": 79 },
