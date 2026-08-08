@@ -10,16 +10,35 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* Light theme only – permanent */
+    :root {
+      --bg: #f2f5f9;
+      --card-bg: rgba(255,255,255,0.85);
+      --card-border: rgba(255,255,255,0.9);
+      --text-primary: #0b1a33;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --badge-bg: #f1f5f9;
+      --badge-border: #e2e8f0;
+      --remote-bg: rgba(255,255,255,0.9);
+      --shadow: 0 8px 32px rgba(0,0,0,0.04);
+      --doughnut-bg: #e9edf2;
+      --glow1: rgba(59, 130, 246, 0.04);
+      --glow2: rgba(245, 158, 11, 0.04);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f2f5f9;
+      background: var(--bg);
       height: 100vh;
       width: 100vw;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      transition: background 0.3s;
     }
-
     body::before {
       content: '';
       position: fixed;
@@ -27,7 +46,7 @@
       left: -20%;
       width: 70%;
       height: 80%;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.04) 0%, transparent 70%);
+      background: radial-gradient(circle, var(--glow1) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -38,7 +57,7 @@
       right: -20%;
       width: 70%;
       height: 80%;
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.04) 0%, transparent 70%);
+      background: radial-gradient(circle, var(--glow2) 0%, transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -83,43 +102,55 @@
     .metric-header .icon-svg {
       width: 3.2vh;
       height: 3.2vh;
-      color: #94a3b8;
+      color: var(--text-muted);
     }
     .metric-header h2 {
       font-size: 4.2vh;
       font-weight: 600;
-      color: #0b1a33;
+      color: var(--text-primary);
       letter-spacing: -0.02em;
       margin: 0;
     }
     .metric-header .unit-badge {
       font-size: 2vh;
       font-weight: 500;
-      color: #64748b;
-      background: #e9edf2;
+      color: var(--text-secondary);
+      background: var(--badge-bg);
       padding: 0.2vh 1.2vw;
       border-radius: 40px;
-      border: 1px solid #dce1e8;
+      border: 1px solid var(--badge-border);
     }
+    .metric-header .status-badge {
+      font-size: 1.8vh;
+      font-weight: 600;
+      padding: 0.2vh 1vw;
+      border-radius: 40px;
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      color: var(--text-secondary);
+    }
+    .metric-header .status-badge.on-target { color: #10b981; border-color: #10b981; }
+    .metric-header .status-badge.below-target { color: #f59e0b; border-color: #f59e0b; }
+    .metric-header .status-badge.well-below { color: #ef4444; border-color: #ef4444; }
 
-    /* Remote controls – inline with header */
     .metric-header .remote-inline {
       display: flex;
       align-items: center;
       gap: 0.6vw;
       margin-left: auto;
-      background: rgba(255,255,255,0.7);
+      background: var(--remote-bg);
       backdrop-filter: blur(8px);
       padding: 0.3vh 1vw;
       border-radius: 40px;
-      border: 1px solid rgba(255,255,255,0.9);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
       flex-shrink: 0;
     }
-    .metric-header .remote-inline button {
+    .metric-header .remote-inline button,
+    .metric-header .remote-inline .print-btn {
       background: none;
       border: none;
-      color: #475569;
+      color: var(--text-secondary);
       font-size: 2.2vh;
       cursor: pointer;
       padding: 0.1vh 0.3vw;
@@ -131,15 +162,14 @@
       align-items: center;
       justify-content: center;
     }
-    .metric-header .remote-inline button:hover {
-      background: #f1f5f9;
-      color: #0b1a33;
+    .metric-header .remote-inline button:hover,
+    .metric-header .remote-inline .print-btn:hover {
+      background: var(--badge-bg);
+      color: var(--text-primary);
     }
-    .metric-header .remote-inline .pause-btn {
-      font-size: 1.8vh;
-    }
+    .metric-header .remote-inline .pause-btn { font-size: 1.8vh; }
     .metric-header .remote-inline .dot {
-      color: #cbd5e1;
+      color: var(--text-muted);
       font-size: 1.6vh;
       margin: 0 0.1vw;
       cursor: pointer;
@@ -147,11 +177,11 @@
       line-height: 1;
     }
     .metric-header .remote-inline .dot.active-dot {
-      color: #0b1a33;
+      color: var(--text-primary);
       font-size: 2.2vh;
     }
     .metric-header .remote-inline .slide-counter {
-      color: #94a3b8;
+      color: var(--text-muted);
       font-size: 1.6vh;
       font-weight: 400;
       margin: 0 0.1vw;
@@ -160,7 +190,7 @@
     .metric-header .remote-inline .admin-link {
       background: none;
       border: none;
-      color: #94a3b8;
+      color: var(--text-muted);
       font-size: 1.6vh;
       cursor: pointer;
       padding: 0.1vh 0.3vw;
@@ -172,13 +202,19 @@
       display: flex;
       align-items: center;
       gap: 0.2vw;
-      border-left: 1px solid #e2e8f0;
+      border-left: 1px solid var(--badge-border);
       padding-left: 0.6vw;
       margin-left: 0.2vw;
     }
     .metric-header .remote-inline .admin-link:hover {
       color: #3b82f6;
-      background: #f1f5f9;
+      background: var(--badge-bg);
+    }
+    .metric-header .remote-inline .print-btn {
+      font-size: 1.8vh;
+      border-left: 1px solid var(--badge-border);
+      padding-left: 0.6vw;
+      margin-left: 0.2vw;
     }
 
     .card-row {
@@ -191,11 +227,11 @@
 
     .centre-card {
       flex: 1;
-      background: rgba(255,255,255,0.85);
+      background: var(--card-bg);
       backdrop-filter: blur(8px);
       border-radius: 2.8vh;
-      border: 1px solid rgba(255,255,255,0.9);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0,0,0,0.02);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -219,7 +255,7 @@
     .centre-card.wns { --brand-colour: #f59e0b; }
 
     .chart-area {
-      flex: 0 0 28%;
+      flex: 0 0 25%;
       aspect-ratio: 1/1;
       max-height: 100%;
       position: relative;
@@ -238,28 +274,29 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 0.5vh;
+      gap: 0.3vh;
     }
     .details-area .centre-name {
       font-size: 2.6vh;
       font-weight: 600;
-      color: #94a3b8;
+      color: var(--text-muted);
       letter-spacing: 1px;
       text-transform: uppercase;
       margin-bottom: 0.2vh;
+      display: flex;
+      align-items: center;
+      gap: 0.6vw;
     }
     .details-area .centre-name .colour-dot {
       display: inline-block;
       width: 1.4vh;
       height: 1.4vh;
       border-radius: 50%;
-      margin-right: 0.6vw;
-      vertical-align: middle;
     }
     .details-area .main-value {
-      font-size: 9vh;
+      font-size: 8vh;
       font-weight: 700;
-      color: #0b1a33;
+      color: var(--text-primary);
       letter-spacing: -0.03em;
       line-height: 1;
       display: flex;
@@ -273,34 +310,139 @@
     }
     .trend.up { color: #10b981; }
     .trend.down { color: #ef4444; }
-    .trend.flat { color: #94a3b8; }
+    .trend.flat { color: var(--text-muted); }
+
+    .details-area .comparison-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5vw;
+      font-size: 2vh;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+    .details-area .comparison-row .prev-label {
+      background: var(--badge-bg);
+      padding: 0.2vh 0.8vw;
+      border-radius: 30px;
+      border: 1px solid var(--badge-border);
+      font-size: 1.8vh;
+    }
+    .details-area .comparison-row .gap-label {
+      font-weight: 500;
+    }
+    .details-area .comparison-row .gap-label.above { color: #10b981; }
+    .details-area .comparison-row .gap-label.below { color: #f59e0b; }
+    .details-area .comparison-row .gap-label.well-below { color: #ef4444; }
+
+    .sparkline-container {
+      width: 100%;
+      height: 4vh;
+      margin-top: 0.2vh;
+    }
+    .sparkline-container canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
 
     .details-area .target-row {
       display: flex;
       align-items: center;
       gap: 1.5vw;
-      margin-top: 0.8vh;
+      margin-top: 0.4vh;
       font-size: 2.2vh;
-      color: #64748b;
+      color: var(--text-secondary);
     }
     .details-area .target-row .target-badge {
       display: flex;
       align-items: center;
       gap: 0.4vw;
-      background: #f1f5f9;
+      background: var(--badge-bg);
       padding: 0.3vh 1.2vw;
       border-radius: 40px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--badge-border);
     }
     .details-area .target-row .target-badge .t-icon {
       width: 1.8vh;
       height: 1.8vh;
-      color: #94a3b8;
+      color: var(--text-muted);
     }
     .details-area .target-row .target-badge strong {
-      color: #0b1a33;
+      color: var(--text-primary);
       font-weight: 600;
     }
+
+    .summary-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 2vh;
+      width: 100%;
+      height: 100%;
+    }
+    .summary-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border-radius: 2.8vh;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow);
+      padding: 1.5vh 2vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .summary-card .metric-name {
+      font-size: 2.6vh;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 0.5vh;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.3vh 0;
+      border-bottom: 1px solid var(--badge-border);
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row .centre-label {
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 0.4vw;
+    }
+    .summary-row .centre-label .dot {
+      width: 1.2vh;
+      height: 1.2vh;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .summary-row .values {
+      display: flex;
+      gap: 1.5vw;
+      align-items: center;
+      font-weight: 500;
+    }
+    .summary-row .values .current {
+      font-size: 2.6vh;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .summary-row .values .change {
+      font-size: 1.8vh;
+    }
+    .summary-row .values .gap {
+      font-size: 1.8vh;
+      padding: 0.1vh 0.6vw;
+      border-radius: 20px;
+      background: var(--badge-bg);
+    }
+    .summary-row .values .gap.above { color: #10b981; }
+    .summary-row .values .gap.below { color: #f59e0b; }
+    .summary-row .values .gap.well-below { color: #ef4444; }
 
     @media (max-width: 768px) {
       .slide { padding: 1.5vh 2vw; gap: 1.5vh; }
@@ -311,6 +453,16 @@
       .metric-header h2 { font-size: 2.8vh; }
       .metric-header .remote-inline { padding: 0.2vh 1.5vw; gap: 1vw; flex-wrap: wrap; }
       .metric-header .remote-inline .admin-link { border-left: none; padding-left: 0; margin-left: 0; }
+      .summary-grid { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+    }
+
+    /* Print styles */
+    @media print {
+      body { background: white !important; }
+      .slide { opacity: 1 !important; position: relative !important; display: block !important; }
+      .slide:not(.active) { display: none !important; }
+      .remote-inline { display: none !important; }
+      .centre-card { break-inside: avoid; }
     }
   </style>
 </head>
@@ -325,195 +477,332 @@
     let slidesData = [];
     let intervalId = null;
     let isPaused = false;
+    let allData = null;
 
-    let data;
-    try {
-      const res = await fetch('data.json?t=' + Date.now());
-      if (!res.ok) throw new Error('Network error');
-      data = await res.json();
-    } catch(e) {
-      document.body.innerHTML = `<div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#b91c1c;font-size:2.5rem;background:#f2f5f9;">⚠️ Could not load data.json</div>`;
-      return;
-    }
-
-    const targets = data.targets;
-    const centres = data.centres;
-    const metricKeys = ['SIS', 'IFSR', 'CHT'];
-    const metricLabels = { SIS: 'SIS', IFSR: 'IFSR', CHT: 'CHT' };
-    const metricUnits = { SIS: '%', IFSR: '%', CHT: 's' };
-    const higherIsBetter = { SIS: true, IFSR: true, CHT: false };
-
-    const svgIcons = {
-      SIS: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v-2a5 5 0 0 0-5-5H8a5 5 0 0 0-5 5v2"/><circle cx="12" cy="16" r="5"/><path d="M12 11v5"/><path d="M9 13l3 3 3-3"/></svg>`,
-      IFSR: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4"/><path d="M12 22v-4"/><path d="M2 12h4"/><path d="M22 12h-4"/></svg>`,
-      CHT: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
-    };
-
-    const container = document.getElementById('slidesContainer');
-
-    // Build remote HTML (reused for each slide)
-    function buildRemoteHTML(slideIndex, totalSlides) {
-      let dotsHTML = '';
-      for (let i = 0; i < totalSlides; i++) {
-        dotsHTML += `<span class="dot ${i === slideIndex ? 'active-dot' : ''}" data-index="${i}">●</span>`;
+    // --- Helper functions ---
+    function getStatusClass(value, target, isHigher) {
+      if (isHigher) {
+        if (value >= target) return 'on-target';
+        if (value >= target * 0.9) return 'below-target';
+        return 'well-below';
+      } else {
+        if (value <= target) return 'on-target';
+        if (value <= target * 1.1) return 'below-target';
+        return 'well-below';
       }
-      return `
-        <div class="remote-inline">
-          <button class="prev-btn" title="Previous">‹</button>
-          <button class="pause-btn" title="Pause/Play">⏸</button>
-          <button class="next-btn" title="Next">›</button>
-          <span class="slide-counter">${slideIndex+1} / ${totalSlides}</span>
-          ${dotsHTML}
-          <button class="admin-link" title="Open Admin (keyboard: A)">⚙ Admin</button>
-        </div>
-      `;
     }
 
-    metricKeys.forEach((metricKey, slideIndex) => {
-      const slide = document.createElement('div');
-      slide.className = 'slide' + (slideIndex === 0 ? ' active' : '');
+    function getGapText(value, target, isHigher) {
+      const diff = isHigher ? value - target : target - value;
+      const gap = Math.abs(diff);
+      if (isHigher) {
+        if (diff >= 0) return `+${gap.toFixed(1)} above target`;
+        return `${gap.toFixed(1)} below target`;
+      } else {
+        if (diff >= 0) return `${gap.toFixed(1)} below target`;
+        return `+${gap.toFixed(1)} above target`;
+      }
+    }
 
-      // Header with remote controls inline
-      const header = document.createElement('div');
-      header.className = 'metric-header';
-      header.innerHTML = `
-        ${svgIcons[metricKey]}
-        <h2>${metricLabels[metricKey]}</h2>
-        <span class="unit-badge">${metricUnits[metricKey]}</span>
-        ${buildRemoteHTML(slideIndex, metricKeys.length)}
-      `;
-      slide.appendChild(header);
+    function getGapClass(value, target, isHigher) {
+      if (isHigher) {
+        if (value >= target) return 'above';
+        if (value >= target * 0.9) return 'below';
+        return 'well-below';
+      } else {
+        if (value <= target) return 'above';
+        if (value <= target * 1.1) return 'below';
+        return 'well-below';
+      }
+    }
 
-      const cardRow = document.createElement('div');
-      cardRow.className = 'card-row';
+    // --- Fetch data ---
+    async function fetchData() {
+      try {
+        const res = await fetch('data.json?t=' + Date.now());
+        if (!res.ok) throw new Error('Network error');
+        allData = await res.json();
+        return allData;
+      } catch(e) {
+        console.error('Fetch error:', e);
+        return null;
+      }
+    }
 
-      centres.forEach((centre) => {
-        const card = document.createElement('div');
-        card.className = `centre-card ${centre.name.toLowerCase()}`;
+    // --- Build slides ---
+    function buildSlides(data) {
+      const container = document.getElementById('slidesContainer');
+      container.innerHTML = '';
+      slidesData = [];
+      const targets = data.targets;
+      const centres = data.centres;
+      const metricKeys = ['SIS', 'IFSR', 'CHT', 'SUMMARY'];
+      const metricLabels = { SIS: 'SIS', IFSR: 'IFSR', CHT: 'CHT', SUMMARY: 'Summary' };
+      const metricUnits = { SIS: '%', IFSR: '%', CHT: 's', SUMMARY: '' };
+      const higherIsBetter = { SIS: true, IFSR: true, CHT: false };
 
-        const chartArea = document.createElement('div');
-        chartArea.className = 'chart-area';
-        const canvas = document.createElement('canvas');
-        canvas.id = `chart-${centre.name}-${metricKey}`;
-        chartArea.appendChild(canvas);
+      const svgIcons = {
+        SIS: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12v-2a5 5 0 0 0-5-5H8a5 5 0 0 0-5 5v2"/><circle cx="12" cy="16" r="5"/><path d="M12 11v5"/><path d="M9 13l3 3 3-3"/></svg>`,
+        IFSR: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4"/><path d="M12 22v-4"/><path d="M2 12h4"/><path d="M22 12h-4"/></svg>`,
+        CHT: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+        SUMMARY: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`
+      };
 
-        const details = document.createElement('div');
-        details.className = 'details-area';
-        const dotColour = centre.colour;
-        details.innerHTML = `
-          <div class="centre-name">
-            <span class="colour-dot" style="background:${dotColour};"></span>
-            ${centre.name}
-          </div>
-          <div class="main-value">
-            <span id="val-${centre.name}-${metricKey}">—</span>
-            <span class="trend" id="trend-${centre.name}-${metricKey}"></span>
-          </div>
-          <div class="target-row">
-            <span class="target-badge">
-              <svg class="t-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-              Target: <strong>${targets[metricKey]}${metricUnits[metricKey]}</strong>
-            </span>
-            <span style="font-size:1.8vh;color:#cbd5e1;">|</span>
-            <span style="font-size:1.8vh;color:#94a3b8;">${metricKey === 'CHT' ? '↓ lower is better' : '↑ higher is better'}</span>
+      function buildRemoteHTML(slideIndex, totalSlides) {
+        let dotsHTML = '';
+        for (let i = 0; i < totalSlides; i++) {
+          dotsHTML += `<span class="dot ${i === slideIndex ? 'active-dot' : ''}" data-index="${i}">●</span>`;
+        }
+        return `
+          <div class="remote-inline">
+            <button class="prev-btn" title="Previous">‹</button>
+            <button class="pause-btn" title="Pause/Play">⏸</button>
+            <button class="next-btn" title="Next">›</button>
+            <span class="slide-counter">${slideIndex+1} / ${totalSlides}</span>
+            ${dotsHTML}
+            <button class="print-btn" title="Print this slide">🖨️</button>
+            <button class="admin-link" title="Open Admin (keyboard: A)">⚙ Admin</button>
           </div>
         `;
+      }
 
-        card.appendChild(chartArea);
-        card.appendChild(details);
-        cardRow.appendChild(card);
+      // Build each metric slide (first 3)
+      for (let mi = 0; mi < 3; mi++) {
+        const metricKey = metricKeys[mi];
+        const slide = document.createElement('div');
+        slide.className = 'slide' + (mi === 0 ? ' active' : '');
+        slide.dataset.slideType = 'metric';
 
+        const header = document.createElement('div');
+        header.className = 'metric-header';
+        header.innerHTML = `
+          ${svgIcons[metricKey]}
+          <h2>${metricLabels[metricKey]}</h2>
+          <span class="unit-badge">${metricUnits[metricKey]}</span>
+          <span class="status-badge" id="status-${metricKey}">—</span>
+          ${buildRemoteHTML(mi, 4)}
+        `;
+        slide.appendChild(header);
+
+        const cardRow = document.createElement('div');
+        cardRow.className = 'card-row';
+
+        centres.forEach((centre) => {
+          const card = document.createElement('div');
+          card.className = `centre-card ${centre.name.toLowerCase()}`;
+
+          const chartArea = document.createElement('div');
+          chartArea.className = 'chart-area';
+          const canvas = document.createElement('canvas');
+          canvas.id = `chart-${centre.name}-${metricKey}`;
+          chartArea.appendChild(canvas);
+
+          const details = document.createElement('div');
+          details.className = 'details-area';
+          const dotColour = centre.colour;
+          details.innerHTML = `
+            <div class="centre-name">
+              <span class="colour-dot" style="background:${dotColour};"></span>
+              ${centre.name}
+            </div>
+            <div class="main-value">
+              <span id="val-${centre.name}-${metricKey}">—</span>
+              <span class="trend" id="trend-${centre.name}-${metricKey}"></span>
+            </div>
+            <div class="comparison-row">
+              <span class="prev-label" id="prev-${centre.name}-${metricKey}">Prev: —</span>
+              <span class="gap-label" id="gap-${centre.name}-${metricKey}">Gap: —</span>
+            </div>
+            <div class="sparkline-container">
+              <canvas id="spark-${centre.name}-${metricKey}"></canvas>
+            </div>
+            <div class="target-row">
+              <span class="target-badge">
+                <svg class="t-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                Target: <strong>${targets[metricKey]}${metricUnits[metricKey]}</strong>
+              </span>
+              <span style="font-size:1.8vh;color:var(--text-muted);">${metricKey === 'CHT' ? '↓ lower is better' : '↑ higher is better'}</span>
+            </div>
+          `;
+
+          card.appendChild(chartArea);
+          card.appendChild(details);
+          cardRow.appendChild(card);
+
+          slidesData.push({
+            slideIndex: mi,
+            centreName: centre.name,
+            colour: centre.colour,
+            metricKey,
+            canvas,
+            target: targets[metricKey],
+            current: centre.metrics[metricKey].current,
+            previous: centre.metrics[metricKey].previous,
+            history: centre.metrics[metricKey].history || [],
+            higherIsBetter: higherIsBetter[metricKey],
+            unit: metricUnits[metricKey],
+            valueEl: document.getElementById(`val-${centre.name}-${metricKey}`),
+            trendEl: document.getElementById(`trend-${centre.name}-${metricKey}`),
+            prevEl: document.getElementById(`prev-${centre.name}-${metricKey}`),
+            gapEl: document.getElementById(`gap-${centre.name}-${metricKey}`),
+            sparkCanvas: document.getElementById(`spark-${centre.name}-${metricKey}`),
+            statusBadge: document.getElementById(`status-${metricKey}`)
+          });
+        });
+
+        slide.appendChild(cardRow);
+        container.appendChild(slide);
+      }
+
+      // --- Summary slide (index 3) ---
+      const summarySlide = document.createElement('div');
+      summarySlide.className = 'slide';
+      summarySlide.dataset.slideType = 'summary';
+
+      const summaryHeader = document.createElement('div');
+      summaryHeader.className = 'metric-header';
+      summaryHeader.innerHTML = `
+        ${svgIcons.SUMMARY}
+        <h2>Summary Dashboard</h2>
+        ${buildRemoteHTML(3, 4)}
+      `;
+      summarySlide.appendChild(summaryHeader);
+
+      const summaryGrid = document.createElement('div');
+      summaryGrid.className = 'summary-grid';
+
+      const metricKeysSummary = ['SIS', 'IFSR', 'CHT'];
+      metricKeysSummary.forEach((metricKey) => {
+        const card = document.createElement('div');
+        card.className = 'summary-card';
+        card.innerHTML = `
+          <div class="metric-name">${metricKey}</div>
+          <div class="summary-row" id="summary-row-${metricKey}-tp"></div>
+          <div class="summary-row" id="summary-row-${metricKey}-wns"></div>
+        `;
+        summaryGrid.appendChild(card);
         slidesData.push({
-          slideIndex,
-          centreName: centre.name,
-          colour: centre.colour,
+          slideIndex: 3,
           metricKey,
-          canvas,
+          summaryRowTP: document.getElementById(`summary-row-${metricKey}-tp`),
+          summaryRowWNS: document.getElementById(`summary-row-${metricKey}-wns`),
           target: targets[metricKey],
-          current: centre.metrics[metricKey].current,
-          previous: centre.metrics[metricKey].previous,
           higherIsBetter: higherIsBetter[metricKey],
-          unit: metricUnits[metricKey],
-          valueEl: document.getElementById(`val-${centre.name}-${metricKey}`),
-          trendEl: document.getElementById(`trend-${centre.name}-${metricKey}`)
+          unit: metricUnits[metricKey]
         });
       });
 
-      slide.appendChild(cardRow);
-      container.appendChild(slide);
-    });
+      summarySlide.appendChild(summaryGrid);
+      container.appendChild(summarySlide);
+    }
 
-    // --- Init Charts with centre text plugin ---
-    const charts = [];
-    slidesData.forEach((item) => {
-      const ctx = item.canvas.getContext('2d');
-      const current = item.current;
-      const target = item.target;
-      const isHigher = item.higherIsBetter;
+    // --- Chart initialisation and update ---
+    let chartInstances = {};
 
-      let met;
-      if (isHigher) met = current >= target;
-      else met = current <= target;
+    function initCharts() {
+      slidesData.forEach((item) => {
+        if (item.slideIndex === 3) return;
+        const ctx = item.canvas.getContext('2d');
+        const current = item.current;
+        const target = item.target;
+        const isHigher = item.higherIsBetter;
 
-      let fillPercent;
-      if (isHigher) {
-        fillPercent = Math.min((current / target) * 100, 100);
-      } else {
-        if (current <= target) fillPercent = 100;
-        else fillPercent = Math.min((target / current) * 100, 100);
-      }
+        let met;
+        if (isHigher) met = current >= target;
+        else met = current <= target;
 
-      const colour = met ? '#10b981' : '#f59e0b';
-
-      const centreTextPlugin = {
-        id: 'centreText',
-        beforeDraw: function(chart) {
-          const { width, height, ctx } = chart;
-          ctx.save();
-          const text = item.current + (item.unit === '%' ? '%' : '');
-          const fontSize = Math.min(width, height) * 0.2;
-          ctx.font = `700 ${fontSize}px Inter, -apple-system, sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillStyle = '#0b1a33';
-          ctx.fillText(text, width / 2, height / 2);
-          ctx.restore();
+        let fillPercent;
+        if (isHigher) {
+          fillPercent = Math.min((current / target) * 100, 100);
+        } else {
+          if (current <= target) fillPercent = 100;
+          else fillPercent = Math.min((target / current) * 100, 100);
         }
-      };
 
-      const chart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          datasets: [{
-            data: [fillPercent, 100 - fillPercent],
-            backgroundColor: [colour, '#e9edf2'],
-            borderWidth: 0,
-            borderRadius: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          cutout: '72%',
-          plugins: {
-            tooltip: { enabled: false },
-            legend: { display: false }
-          },
-          animation: {
-            animateRotate: true,
-            duration: 800
+        const colour = met ? '#10b981' : '#f59e0b';
+
+        const centreTextPlugin = {
+          id: 'centreText',
+          beforeDraw: function(chart) {
+            const { width, height, ctx } = chart;
+            ctx.save();
+            const text = item.current + (item.unit === '%' ? '%' : '');
+            const fontSize = Math.min(width, height) * 0.2;
+            ctx.font = `700 ${fontSize}px Inter, -apple-system, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#0b1a33';
+            ctx.fillText(text, width / 2, height / 2);
+            ctx.restore();
           }
-        },
-        plugins: [centreTextPlugin]
-      });
-      charts.push(chart);
-      item.chart = chart;
+        };
 
-      const displayVal = current + (item.unit === '%' ? '%' : '');
+        const chart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            datasets: [{
+              data: [fillPercent, 100 - fillPercent],
+              backgroundColor: [colour, '#e9edf2'],
+              borderWidth: 0,
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '72%',
+            plugins: {
+              tooltip: { enabled: false },
+              legend: { display: false }
+            },
+            animation: {
+              animateRotate: true,
+              duration: 800
+            }
+          },
+          plugins: [centreTextPlugin]
+        });
+        chartInstances[`${item.centreName}-${item.metricKey}`] = chart;
+
+        // Sparkline
+        if (item.sparkCanvas && item.history && item.history.length > 1) {
+          const sparkCtx = item.sparkCanvas.getContext('2d');
+          new Chart(sparkCtx, {
+            type: 'line',
+            data: {
+              labels: item.history.map((_, i) => i+1),
+              datasets: [{
+                data: item.history,
+                borderColor: item.colour,
+                borderWidth: 2,
+                fill: false,
+                tension: 0.2,
+                pointRadius: 0,
+                pointHoverRadius: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false }, tooltip: { enabled: false } },
+              scales: { x: { display: false }, y: { display: false } },
+              animation: false
+            }
+          });
+        }
+
+        updateMetricText(item);
+      });
+
+      updateSummary();
+    }
+
+    function updateMetricText(item) {
+      const displayVal = item.current + (item.unit === '%' ? '%' : '');
       if (item.valueEl) item.valueEl.textContent = displayVal;
 
       const prev = item.previous;
-      const diff = current - prev;
+      const diff = item.current - prev;
       let trendText = '', trendClass = 'flat';
       if (Math.abs(diff) < 0.01) {
         trendText = '→ 0%';
@@ -521,35 +810,178 @@
         const pctChange = (diff / Math.abs(prev)) * 100;
         const sign = diff > 0 ? '+' : '';
         trendText = `${sign}${pctChange.toFixed(1)}%`;
-        if (isHigher) trendClass = diff > 0 ? 'up' : 'down';
+        if (item.higherIsBetter) trendClass = diff > 0 ? 'up' : 'down';
         else trendClass = diff < 0 ? 'up' : 'down';
       }
       if (item.trendEl) {
         item.trendEl.textContent = trendText;
         item.trendEl.className = `trend ${trendClass}`;
       }
-    });
+
+      if (item.prevEl) {
+        item.prevEl.textContent = `Prev: ${prev}${item.unit}`;
+      }
+
+      if (item.gapEl) {
+        const gapText = getGapText(item.current, item.target, item.higherIsBetter);
+        const gapClass = getGapClass(item.current, item.target, item.higherIsBetter);
+        item.gapEl.textContent = gapText;
+        item.gapEl.className = `gap-label ${gapClass}`;
+      }
+
+      if (item.statusBadge) {
+        const status = getStatusClass(item.current, item.target, item.higherIsBetter);
+        let label = '';
+        if (status === 'on-target') label = '✅ On Target';
+        else if (status === 'below-target') label = '⚠️ Below Target';
+        else label = '❌ Well Below';
+        item.statusBadge.textContent = label;
+        item.statusBadge.className = `status-badge ${status}`;
+      }
+    }
+
+    function updateSummary() {
+      const metricKeys = ['SIS', 'IFSR', 'CHT'];
+      const centres = allData.centres;
+      metricKeys.forEach((metricKey) => {
+        const target = allData.targets[metricKey];
+        const isHigher = metricKey !== 'CHT';
+        const unit = metricKey === 'CHT' ? 's' : '%';
+        const rowTP = document.getElementById(`summary-row-${metricKey}-tp`);
+        const rowWNS = document.getElementById(`summary-row-${metricKey}-wns`);
+        if (!rowTP || !rowWNS) return;
+
+        const tpCentre = centres.find(c => c.name === 'TP');
+        const wnsCentre = centres.find(c => c.name === 'WNS');
+        if (!tpCentre || !wnsCentre) return;
+
+        const tpData = tpCentre.metrics[metricKey];
+        const wnsData = wnsCentre.metrics[metricKey];
+
+        function buildRowHTML(centre, data) {
+          const current = data.current;
+          const prev = data.previous;
+          const diff = current - prev;
+          const pctChange = (Math.abs(prev) > 0) ? (diff / Math.abs(prev)) * 100 : 0;
+          const sign = diff > 0 ? '+' : (diff < 0 ? '' : '');
+          const changeText = (Math.abs(diff) < 0.01) ? '→ 0%' : `${sign}${pctChange.toFixed(1)}%`;
+          const gap = isHigher ? current - target : target - current;
+          const gapAbs = Math.abs(gap);
+          const gapText = (gap >= 0 ? '✅' : '⚠️') + ' ' + gapAbs.toFixed(1) + (unit === '%' ? '%' : 's');
+          const gapClass = getGapClass(current, target, isHigher);
+          return `
+            <span class="centre-label">
+              <span class="dot" style="background:${centre.colour};"></span>
+              ${centre.name}
+            </span>
+            <span class="values">
+              <span class="current">${current}${unit}</span>
+              <span class="change ${diff > 0 ? (isHigher ? 'up' : 'down') : (diff < 0 ? (isHigher ? 'down' : 'up') : 'flat')}">${changeText}</span>
+              <span class="gap ${gapClass}">${gapText}</span>
+            </span>
+          `;
+        }
+
+        rowTP.innerHTML = buildRowHTML(tpCentre, tpData);
+        rowWNS.innerHTML = buildRowHTML(wnsCentre, wnsData);
+      });
+    }
+
+    // --- Refresh data and update everything ---
+    async function refreshData() {
+      const newData = await fetchData();
+      if (!newData) return;
+      allData = newData;
+      slidesData.forEach((item) => {
+        if (item.slideIndex === 3) {
+          item.target = allData.targets[item.metricKey];
+          return;
+        }
+        const centre = allData.centres.find(c => c.name === item.centreName);
+        if (!centre) return;
+        const metric = centre.metrics[item.metricKey];
+        if (!metric) return;
+        item.current = metric.current;
+        item.previous = metric.previous;
+        item.history = metric.history || [];
+        item.target = allData.targets[item.metricKey];
+
+        const chart = chartInstances[`${item.centreName}-${item.metricKey}`];
+        if (chart) {
+          const isHigher = item.higherIsBetter;
+          let met = isHigher ? item.current >= item.target : item.current <= item.target;
+          let fillPercent;
+          if (isHigher) {
+            fillPercent = Math.min((item.current / item.target) * 100, 100);
+          } else {
+            if (item.current <= item.target) fillPercent = 100;
+            else fillPercent = Math.min((item.target / item.current) * 100, 100);
+          }
+          const colour = met ? '#10b981' : '#f59e0b';
+          chart.data.datasets[0].data = [fillPercent, 100 - fillPercent];
+          chart.data.datasets[0].backgroundColor = [colour, '#e9edf2'];
+          chart.update();
+        }
+
+        updateMetricText(item);
+
+        if (item.sparkCanvas && item.history && item.history.length > 1) {
+          const existing = Chart.getChart(item.sparkCanvas);
+          if (existing) existing.destroy();
+          const sparkCtx = item.sparkCanvas.getContext('2d');
+          new Chart(sparkCtx, {
+            type: 'line',
+            data: {
+              labels: item.history.map((_, i) => i+1),
+              datasets: [{
+                data: item.history,
+                borderColor: item.colour,
+                borderWidth: 2,
+                fill: false,
+                tension: 0.2,
+                pointRadius: 0,
+                pointHoverRadius: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false }, tooltip: { enabled: false } },
+              scales: { x: { display: false }, y: { display: false } },
+              animation: false
+            }
+          });
+        }
+      });
+      updateSummary();
+    }
 
     // --- Navigation ---
     function goToSlide(index) {
+      const slides = document.querySelectorAll('.slide');
       if (index < 0) index = 0;
-      if (index >= metricKeys.length) index = metricKeys.length - 1;
+      if (index >= slides.length) index = slides.length - 1;
       currentSlide = index;
-      document.querySelectorAll('.slide').forEach((s, i) => s.classList.toggle('active', i === index));
+      slides.forEach((s, i) => s.classList.toggle('active', i === index));
       
-      // Update dots and counters inside each slide's remote
       document.querySelectorAll('.remote-inline').forEach((remote, idx) => {
         const dots = remote.querySelectorAll('.dot');
         dots.forEach((d, i) => {
           d.classList.toggle('active-dot', i === index);
         });
         const counter = remote.querySelector('.slide-counter');
-        if (counter) counter.textContent = `${index+1} / ${metricKeys.length}`;
+        if (counter) counter.textContent = `${index+1} / ${slides.length}`;
       });
     }
 
-    function nextSlide() { goToSlide((currentSlide + 1) % metricKeys.length); }
-    function prevSlide() { goToSlide((currentSlide - 1 + metricKeys.length) % metricKeys.length); }
+    function nextSlide() {
+      const slides = document.querySelectorAll('.slide');
+      goToSlide((currentSlide + 1) % slides.length);
+    }
+    function prevSlide() {
+      const slides = document.querySelectorAll('.slide');
+      goToSlide((currentSlide - 1 + slides.length) % slides.length);
+    }
 
     function startAutoPlay() {
       if (intervalId) clearInterval(intervalId);
@@ -562,7 +994,11 @@
       else { clearInterval(intervalId); intervalId = null; isPaused = true; document.querySelectorAll('.pause-btn').forEach(btn => btn.textContent = '▶'); }
     }
 
-    // Event delegation for remote controls (since they're inside slides)
+    function printSlide() {
+      window.print();
+    }
+
+    // --- Event listeners ---
     document.addEventListener('click', (e) => {
       const target = e.target.closest('button');
       if (!target) return;
@@ -583,7 +1019,9 @@
       if (target.classList.contains('admin-link')) {
         window.open('admin.html', '_blank');
       }
-      // Dot navigation
+      if (target.classList.contains('print-btn')) {
+        printSlide();
+      }
       const dot = target.closest('.dot');
       if (dot && dot.dataset.index !== undefined) {
         clearInterval(intervalId);
@@ -592,17 +1030,28 @@
       }
     });
 
-    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); clearInterval(intervalId); nextSlide(); startAutoPlay(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); clearInterval(intervalId); prevSlide(); startAutoPlay(); }
       if (e.key === 'p' || e.key === 'P') { e.preventDefault(); togglePause(); }
       if (e.key === 'a' || e.key === 'A') { e.preventDefault(); window.open('admin.html', '_blank'); }
+      if (e.key === 'PrintScreen') { printSlide(); }
     });
 
-    goToSlide(0);
-    startAutoPlay();
-    window.addEventListener('resize', () => charts.forEach(ch => ch.resize()));
+    // --- Initialise ---
+    const initialData = await fetchData();
+    if (!initialData) {
+      document.body.innerHTML = `<div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#b91c1c;font-size:2.5rem;background:#f2f5f9;">⚠️ Could not load data.json</div>`;
+      return;
+    }
+    allData = initialData;
+    buildSlides(initialData);
+    setTimeout(() => {
+      initCharts();
+      goToSlide(0);
+      startAutoPlay();
+      setInterval(refreshData, 60000);
+    }, 100);
   })();
 </script>
 </body>
