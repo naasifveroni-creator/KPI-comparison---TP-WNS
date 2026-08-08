@@ -36,7 +36,6 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: background 0.3s;
     }
     body::before {
       content: '';
@@ -91,6 +90,7 @@
       pointer-events: auto;
     }
 
+    /* Metric header */
     .metric-header {
       display: flex;
       align-items: center;
@@ -132,6 +132,7 @@
     .metric-header .status-badge.below-target { color: #f59e0b; border-color: #f59e0b; }
     .metric-header .status-badge.well-below { color: #ef4444; border-color: #ef4444; }
 
+    /* Remote (clean, no print) */
     .metric-header .remote-inline {
       display: flex;
       align-items: center;
@@ -145,8 +146,7 @@
       box-shadow: var(--shadow);
       flex-shrink: 0;
     }
-    .metric-header .remote-inline button,
-    .metric-header .remote-inline .print-btn {
+    .metric-header .remote-inline button {
       background: none;
       border: none;
       color: var(--text-secondary);
@@ -161,8 +161,7 @@
       align-items: center;
       justify-content: center;
     }
-    .metric-header .remote-inline button:hover,
-    .metric-header .remote-inline .print-btn:hover {
+    .metric-header .remote-inline button:hover {
       background: var(--badge-bg);
       color: var(--text-primary);
     }
@@ -209,13 +208,8 @@
       color: #3b82f6;
       background: var(--badge-bg);
     }
-    .metric-header .remote-inline .print-btn {
-      font-size: 1.8vh;
-      border-left: 1px solid var(--badge-border);
-      padding-left: 0.6vw;
-      margin-left: 0.2vw;
-    }
 
+    /* Metric slides */
     .card-row {
       flex: 1;
       display: flex;
@@ -235,7 +229,6 @@
       flex-direction: row;
       align-items: center;
       padding: 1.5vh 2.5vw;
-      transition: all 0.25s ease;
       position: relative;
       overflow: hidden;
       min-height: 0;
@@ -333,7 +326,6 @@
     .details-area .comparison-row .gap-label.below { color: #f59e0b; }
     .details-area .comparison-row .gap-label.well-below { color: #ef4444; }
 
-    /* NEW: Insight label – replaces "higher is better" */
     .details-area .insight-row {
       display: flex;
       align-items: center;
@@ -395,78 +387,135 @@
       font-weight: 600;
     }
 
+    /* Summary slide – clean, no crowns */
     .summary-grid {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 2vh;
       width: 100%;
       height: 100%;
+      align-content: stretch;
     }
+
     .summary-card {
       background: var(--card-bg);
       backdrop-filter: blur(8px);
       border-radius: 2.8vh;
       border: 1px solid var(--card-border);
       box-shadow: var(--shadow);
-      padding: 1.5vh 2vw;
+      padding: 2vh 1.8vw;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
+      transition: transform 0.2s;
+      position: relative;
+      overflow: hidden;
     }
-    .summary-card .metric-name {
-      font-size: 2.6vh;
-      font-weight: 600;
+    .summary-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0.6vh;
+      background: linear-gradient(90deg, #3b82f6, #f59e0b);
+      opacity: 0.3;
+    }
+    .summary-card .metric-title {
+      font-size: 2.8vh;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      margin-bottom: 1.2vh;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .summary-card .metric-title .unit {
+      font-size: 1.8vh;
+      font-weight: 500;
       color: var(--text-muted);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: 0.5vh;
+      background: var(--badge-bg);
+      padding: 0.1vh 1vw;
+      border-radius: 40px;
+      border: 1px solid var(--badge-border);
     }
+
     .summary-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 0.3vh 0;
+      justify-content: space-between;
+      padding: 0.8vh 0;
       border-bottom: 1px solid var(--badge-border);
     }
     .summary-row:last-child { border-bottom: none; }
-    .summary-row .centre-label {
-      font-weight: 600;
-      color: var(--text-secondary);
+
+    .summary-row .centre-info {
       display: flex;
       align-items: center;
-      gap: 0.4vw;
+      gap: 0.6vw;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 2vh;
+      flex: 0 0 25%;
     }
-    .summary-row .centre-label .dot {
-      width: 1.2vh;
-      height: 1.2vh;
+    .summary-row .centre-info .dot {
+      width: 1.4vh;
+      height: 1.4vh;
       border-radius: 50%;
       display: inline-block;
     }
+
     .summary-row .values {
       display: flex;
-      gap: 1.5vw;
       align-items: center;
-      font-weight: 500;
+      gap: 1.5vw;
+      flex: 1;
+      justify-content: flex-end;
     }
     .summary-row .values .current {
-      font-size: 2.6vh;
+      font-size: 2.8vh;
       font-weight: 700;
       color: var(--text-primary);
     }
     .summary-row .values .change {
-      font-size: 1.8vh;
+      font-size: 2vh;
+      font-weight: 500;
+      min-width: 4.5vw;
     }
-    .summary-row .values .gap {
+    .summary-row .values .change.up { color: #10b981; }
+    .summary-row .values .change.down { color: #ef4444; }
+    .summary-row .values .change.flat { color: var(--text-muted); }
+
+    .summary-row .values .gap-badge {
       font-size: 1.8vh;
-      padding: 0.1vh 0.6vw;
-      border-radius: 20px;
+      padding: 0.2vh 0.8vw;
+      border-radius: 30px;
       background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2vw;
     }
-    .summary-row .values .gap.above { color: #10b981; }
-    .summary-row .values .gap.below { color: #f59e0b; }
-    .summary-row .values .gap.well-below { color: #ef4444; }
+    .summary-row .values .gap-badge.above { color: #10b981; border-color: #10b981; background: rgba(16,185,129,0.08); }
+    .summary-row .values .gap-badge.below { color: #f59e0b; border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+    .summary-row .values .gap-badge.well-below { color: #ef4444; border-color: #ef4444; background: rgba(239,68,68,0.08); }
+
+    .summary-row .bar-container {
+      flex: 0 0 20%;
+      height: 0.8vh;
+      background: var(--badge-bg);
+      border-radius: 40px;
+      overflow: hidden;
+      margin-left: 0.5vw;
+    }
+    .summary-row .bar-container .bar-fill {
+      height: 100%;
+      border-radius: 40px;
+      transition: width 0.6s ease;
+    }
 
     @media (max-width: 768px) {
       .slide { padding: 1.5vh 2vw; gap: 1.5vh; }
@@ -477,7 +526,9 @@
       .metric-header h2 { font-size: 2.8vh; }
       .metric-header .remote-inline { padding: 0.2vh 1.5vw; gap: 1vw; flex-wrap: wrap; }
       .metric-header .remote-inline .admin-link { border-left: none; padding-left: 0; margin-left: 0; }
-      .summary-grid { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+      .summary-grid { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); gap: 1.5vh; }
+      .summary-row .values { flex-wrap: wrap; gap: 0.8vw; }
+      .summary-row .bar-container { display: none; }
     }
 
     @media print {
@@ -485,7 +536,7 @@
       .slide { opacity: 1 !important; position: relative !important; display: block !important; }
       .slide:not(.active) { display: none !important; }
       .remote-inline { display: none !important; }
-      .centre-card { break-inside: avoid; }
+      .centre-card, .summary-card { break-inside: avoid; }
     }
   </style>
 </head>
@@ -502,6 +553,7 @@
     let isPaused = false;
     let allData = null;
 
+    // Helpers
     function getStatusClass(value, target, isHigher) {
       if (isHigher) {
         if (value >= target) return 'on-target';
@@ -518,11 +570,11 @@
       const diff = isHigher ? value - target : target - value;
       const gap = Math.abs(diff);
       if (isHigher) {
-        if (diff >= 0) return `+${gap.toFixed(1)} above target`;
-        return `${gap.toFixed(1)} below target`;
+        if (diff >= 0) return `+${gap.toFixed(1)} above`;
+        return `${gap.toFixed(1)} below`;
       } else {
-        if (diff >= 0) return `${gap.toFixed(1)} below target`;
-        return `+${gap.toFixed(1)} above target`;
+        if (diff >= 0) return `${gap.toFixed(1)} below`;
+        return `+${gap.toFixed(1)} above`;
       }
     }
 
@@ -538,10 +590,8 @@
       }
     }
 
-    // NEW: Generate insight text based on current vs previous
     function getInsightText(current, previous, isHigher, unit) {
       const diff = current - previous;
-      const absDiff = Math.abs(diff);
       if (Math.abs(diff) < 0.01) {
         return `→ Steady at ${current}${unit}`;
       }
@@ -594,12 +644,12 @@
             <button class="next-btn" title="Next">›</button>
             <span class="slide-counter">${slideIndex+1} / ${totalSlides}</span>
             ${dotsHTML}
-            <button class="print-btn" title="Print this slide">🖨️</button>
             <button class="admin-link" title="Open Admin (keyboard: A)">⚙ Admin</button>
           </div>
         `;
       }
 
+      // Metric slides (0,1,2)
       for (let mi = 0; mi < 3; mi++) {
         const metricKey = metricKeys[mi];
         const slide = document.createElement('div');
@@ -646,7 +696,6 @@
               <span class="prev-label" id="prev-${centre.name}-${metricKey}">Prev: —</span>
               <span class="gap-label" id="gap-${centre.name}-${metricKey}">Gap: —</span>
             </div>
-            <!-- NEW: Insight row replaces "higher is better" -->
             <div class="insight-row">
               <span class="insight-badge" id="insight-${centre.name}-${metricKey}">—</span>
             </div>
@@ -691,7 +740,7 @@
         container.appendChild(slide);
       }
 
-      // Summary slide
+      // Summary slide (index 3) – no crowns
       const summarySlide = document.createElement('div');
       summarySlide.className = 'slide';
       summarySlide.dataset.slideType = 'summary';
@@ -700,7 +749,7 @@
       summaryHeader.className = 'metric-header';
       summaryHeader.innerHTML = `
         ${svgIcons.SUMMARY}
-        <h2>Summary Dashboard</h2>
+        <h2>Performance Summary</h2>
         ${buildRemoteHTML(3, 4)}
       `;
       summarySlide.appendChild(summaryHeader);
@@ -712,17 +761,19 @@
       metricKeysSummary.forEach((metricKey) => {
         const card = document.createElement('div');
         card.className = 'summary-card';
+        card.id = `summary-card-${metricKey}`;
         card.innerHTML = `
-          <div class="metric-name">${metricKey}</div>
-          <div class="summary-row" id="summary-row-${metricKey}-tp"></div>
-          <div class="summary-row" id="summary-row-${metricKey}-wns"></div>
+          <div class="metric-title">
+            ${metricKey}
+            <span class="unit">${metricUnits[metricKey]}</span>
+          </div>
+          <div id="summary-rows-${metricKey}"></div>
         `;
         summaryGrid.appendChild(card);
         slidesData.push({
           slideIndex: 3,
           metricKey,
-          summaryRowTP: document.getElementById(`summary-row-${metricKey}-tp`),
-          summaryRowWNS: document.getElementById(`summary-row-${metricKey}-wns`),
+          summaryContainer: document.getElementById(`summary-rows-${metricKey}`),
           target: targets[metricKey],
           higherIsBetter: higherIsBetter[metricKey],
           unit: metricUnits[metricKey]
@@ -787,14 +838,8 @@
             responsive: true,
             maintainAspectRatio: true,
             cutout: '72%',
-            plugins: {
-              tooltip: { enabled: false },
-              legend: { display: false }
-            },
-            animation: {
-              animateRotate: true,
-              duration: 800
-            }
+            plugins: { tooltip: { enabled: false }, legend: { display: false } },
+            animation: { animateRotate: true, duration: 800 }
           },
           plugins: [centreTextPlugin]
         });
@@ -864,11 +909,9 @@
         item.gapEl.className = `gap-label ${gapClass}`;
       }
 
-      // NEW: Update insight label
       if (item.insightEl) {
         const insightText = getInsightText(item.current, item.previous, item.higherIsBetter, item.unit);
         item.insightEl.textContent = insightText;
-        // Determine class based on direction
         const diff = item.current - item.previous;
         if (Math.abs(diff) < 0.01) {
           item.insightEl.className = 'insight-badge steady';
@@ -893,12 +936,11 @@
       const metricKeys = ['SIS', 'IFSR', 'CHT'];
       const centres = allData.centres;
       metricKeys.forEach((metricKey) => {
+        const container = document.getElementById(`summary-rows-${metricKey}`);
+        if (!container) return;
         const target = allData.targets[metricKey];
         const isHigher = metricKey !== 'CHT';
         const unit = metricKey === 'CHT' ? 's' : '%';
-        const rowTP = document.getElementById(`summary-row-${metricKey}-tp`);
-        const rowWNS = document.getElementById(`summary-row-${metricKey}-wns`);
-        if (!rowTP || !rowWNS) return;
 
         const tpCentre = centres.find(c => c.name === 'TP');
         const wnsCentre = centres.find(c => c.name === 'WNS');
@@ -907,32 +949,51 @@
         const tpData = tpCentre.metrics[metricKey];
         const wnsData = wnsCentre.metrics[metricKey];
 
-        function buildRowHTML(centre, data) {
+        function buildRow(centre, data) {
           const current = data.current;
           const prev = data.previous;
           const diff = current - prev;
           const pctChange = (Math.abs(prev) > 0) ? (diff / Math.abs(prev)) * 100 : 0;
           const sign = diff > 0 ? '+' : (diff < 0 ? '' : '');
           const changeText = (Math.abs(diff) < 0.01) ? '→ 0%' : `${sign}${pctChange.toFixed(1)}%`;
+          const changeClass = (diff > 0) ? (isHigher ? 'up' : 'down') : (diff < 0 ? (isHigher ? 'down' : 'up') : 'flat');
+
           const gap = isHigher ? current - target : target - current;
           const gapAbs = Math.abs(gap);
           const gapText = (gap >= 0 ? '✅' : '⚠️') + ' ' + gapAbs.toFixed(1) + (unit === '%' ? '%' : 's');
           const gapClass = getGapClass(current, target, isHigher);
+
+          let barPercent = 0;
+          if (isHigher) {
+            barPercent = Math.min((current / target) * 100, 100);
+          } else {
+            if (current <= target) barPercent = 100;
+            else barPercent = Math.min((target / current) * 100, 100);
+          }
+          const barColor = (gap >= 0) ? '#10b981' : (gapAbs / (isHigher ? target : target*1.5) > 0.15 ? '#ef4444' : '#f59e0b');
+
           return `
-            <span class="centre-label">
-              <span class="dot" style="background:${centre.colour};"></span>
-              ${centre.name}
-            </span>
-            <span class="values">
-              <span class="current">${current}${unit}</span>
-              <span class="change ${diff > 0 ? (isHigher ? 'up' : 'down') : (diff < 0 ? (isHigher ? 'down' : 'up') : 'flat')}">${changeText}</span>
-              <span class="gap ${gapClass}">${gapText}</span>
-            </span>
+            <div class="summary-row">
+              <span class="centre-info">
+                <span class="dot" style="background:${centre.colour};"></span>
+                ${centre.name}
+              </span>
+              <span class="values">
+                <span class="current">${current}${unit}</span>
+                <span class="change ${changeClass}">${changeText}</span>
+                <span class="gap-badge ${gapClass}">${gapText}</span>
+                <span class="bar-container">
+                  <span class="bar-fill" style="width:${barPercent}%;background:${barColor};"></span>
+                </span>
+              </span>
+            </div>
           `;
         }
 
-        rowTP.innerHTML = buildRowHTML(tpCentre, tpData);
-        rowWNS.innerHTML = buildRowHTML(wnsCentre, wnsData);
+        container.innerHTML = `
+          ${buildRow(tpCentre, tpData)}
+          ${buildRow(wnsCentre, wnsData)}
+        `;
       });
     }
 
@@ -1004,6 +1065,7 @@
       updateSummary();
     }
 
+    // Navigation
     function goToSlide(index) {
       const slides = document.querySelectorAll('.slide');
       if (index < 0) index = 0;
@@ -1041,10 +1103,7 @@
       else { clearInterval(intervalId); intervalId = null; isPaused = true; document.querySelectorAll('.pause-btn').forEach(btn => btn.textContent = '▶'); }
     }
 
-    function printSlide() {
-      window.print();
-    }
-
+    // Events
     document.addEventListener('click', (e) => {
       const target = e.target.closest('button');
       if (!target) return;
@@ -1065,9 +1124,6 @@
       if (target.classList.contains('admin-link')) {
         window.open('admin.html', '_blank');
       }
-      if (target.classList.contains('print-btn')) {
-        printSlide();
-      }
       const dot = target.closest('.dot');
       if (dot && dot.dataset.index !== undefined) {
         clearInterval(intervalId);
@@ -1081,9 +1137,9 @@
       if (e.key === 'ArrowLeft') { e.preventDefault(); clearInterval(intervalId); prevSlide(); startAutoPlay(); }
       if (e.key === 'p' || e.key === 'P') { e.preventDefault(); togglePause(); }
       if (e.key === 'a' || e.key === 'A') { e.preventDefault(); window.open('admin.html', '_blank'); }
-      if (e.key === 'PrintScreen') { printSlide(); }
     });
 
+    // Init
     const initialData = await fetchData();
     if (!initialData) {
       document.body.innerHTML = `<div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#b91c1c;font-size:2.5rem;background:#f2f5f9;">⚠️ Could not load data.json</div>`;
