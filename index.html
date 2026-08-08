@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TP vs WNS Leaderboard</title>
+  <title>TP vs WNS | Performance Leaderboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
   <style>
     * {
       margin: 0;
@@ -12,18 +15,25 @@
       box-sizing: border-box;
     }
     body {
-      background: #f5f7fa;
-      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f2f5f9;
+      background-image: radial-gradient(circle at 20% 30%, rgba(26, 115, 232, 0.03) 0%, transparent 60%),
+                        radial-gradient(circle at 80% 70%, rgba(245, 124, 0, 0.03) 0%, transparent 60%);
       height: 100vh;
       width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     /* Slides container */
     .slides {
-      width: 100vw;
-      height: 100vh;
+      flex: 1;
+      width: 100%;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .slide {
@@ -37,7 +47,7 @@
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transition: opacity 0.6s ease;
+      transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       pointer-events: none;
       padding: 2vh 4vw;
     }
@@ -46,105 +56,142 @@
       pointer-events: auto;
     }
 
-    /* Metric title (top) */
-    .metric-title {
-      font-size: 4.5vh;
+    /* Metric header */
+    .metric-header {
+      display: flex;
+      align-items: center;
+      gap: 1.2vw;
+      margin-bottom: 2vh;
+    }
+    .metric-header .icon {
+      font-size: 4vh;
+    }
+    .metric-header h2 {
+      font-size: 5vh;
       font-weight: 700;
-      color: #1e293b;
-      letter-spacing: 1px;
-      margin-bottom: 1.5vh;
-      background: rgba(255, 255, 255, 0.7);
-      padding: 0.5vh 3vw;
-      border-radius: 60px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      color: #0b1a33;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    .metric-header .badge {
+      background: #e6edf5;
+      padding: 0.3vh 1.2vw;
+      border-radius: 40px;
+      font-size: 2.2vh;
+      font-weight: 600;
+      color: #1e3a6b;
+      margin-left: 0.5vw;
     }
 
-    /* Two columns */
+    /* Row */
     .row {
       display: flex;
       flex-direction: row;
       width: 100%;
-      height: 75vh;
+      max-width: 1400px;
+      height: 65vh;
       gap: 3vw;
       justify-content: center;
-      align-items: center;
+      align-items: stretch;
     }
 
-    .centre-col {
+    .centre-card {
       flex: 1;
-      max-width: 46vw;
-      height: 100%;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(2px);
+      border-radius: 3.5vh;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06), 0 8px 20px rgba(0,0,0,0.02);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: white;
-      border-radius: 4vh;
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
-      padding: 2vh 1vw;
+      padding: 2vh 1.5vw;
       position: relative;
+      transition: transform 0.2s;
+      border: 1px solid rgba(255,255,255,0.5);
     }
-
-    .centre-name {
-      font-size: 3.8vh;
+    .centre-card:hover {
+      transform: scale(1.01);
+    }
+    .centre-card .logo {
+      font-size: 2.8vh;
       font-weight: 700;
+      letter-spacing: 0.5px;
       margin-bottom: 0.5vh;
-      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 0.6vw;
+    }
+    .centre-card .logo .dot {
+      display: inline-block;
+      width: 1.2vh;
+      height: 1.2vh;
+      border-radius: 50%;
     }
 
-    .chart-wrapper {
+    .chart-container {
       position: relative;
-      width: 70%;
-      max-height: 55vh;
+      width: 65%;
+      max-height: 45vh;
       aspect-ratio: 1/1;
-      margin: 1vh 0;
+      margin: 0.5vh 0;
     }
-
-    .chart-wrapper canvas {
+    .chart-container canvas {
       width: 100% !important;
       height: 100% !important;
     }
 
-    /* Center text overlay (value + trend) */
-    .centre-value {
+    /* Overlay for centre value + trend */
+    .centre-overlay {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
       pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 80%;
     }
-    .centre-value .number {
-      font-size: 7vh;
+    .centre-overlay .number {
+      font-size: 7.5vh;
       font-weight: 800;
       line-height: 1;
-      display: block;
+      color: #0b1a33;
+      letter-spacing: -0.02em;
     }
-    .centre-value .trend {
+    .centre-overlay .trend {
       font-size: 2.8vh;
       font-weight: 600;
-      display: block;
-      margin-top: 0.2vh;
+      margin-top: -0.2vh;
     }
     .trend.up { color: #10b981; }
     .trend.down { color: #ef4444; }
     .trend.flat { color: #94a3b8; }
 
-    .target-label {
-      font-size: 2.6vh;
+    .target-info {
+      margin-top: 1vh;
+      font-size: 2.2vh;
       font-weight: 500;
       color: #475569;
-      margin-top: 0.8vh;
       background: #f1f5f9;
-      padding: 0.4vh 2vw;
+      padding: 0.4vh 1.8vw;
       border-radius: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4vw;
     }
-    .target-label span {
+    .target-info strong {
       font-weight: 700;
-      color: #0f172a;
+      color: #0b1a33;
+    }
+    .target-info .target-icon {
+      font-size: 1.8vh;
     }
 
-    /* Remote control (small, bottom‑centre) */
+    /* Footer / remote */
     .remote {
       position: fixed;
       bottom: 2.5vh;
@@ -152,32 +199,37 @@
       transform: translateX(-50%);
       display: flex;
       gap: 1.2vw;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(8px);
-      padding: 0.8vh 2vw;
+      background: rgba(11, 26, 51, 0.7);
+      backdrop-filter: blur(12px);
+      padding: 0.6vh 2vw;
       border-radius: 60px;
       z-index: 999;
       align-items: center;
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .remote button {
       background: none;
       border: none;
-      color: #f1f5f9;
+      color: rgba(255,255,255,0.8);
       font-size: 2.8vh;
       cursor: pointer;
-      padding: 0.2vh 0.8vw;
+      padding: 0.2vh 0.6vw;
       border-radius: 40px;
       transition: 0.2s;
-      font-weight: 600;
+      font-weight: 300;
+      line-height: 1;
     }
     .remote button:hover {
       background: rgba(255, 255, 255, 0.15);
+      color: #fff;
     }
     .remote .dot {
-      color: #94a3b8;
+      color: rgba(255,255,255,0.3);
       font-size: 2.2vh;
       margin: 0 0.2vw;
       cursor: pointer;
+      transition: 0.2s;
+      line-height: 1;
     }
     .remote .dot.active-dot {
       color: #ffffff;
@@ -185,15 +237,23 @@
     }
     .remote .pause-btn {
       font-size: 2.2vh;
+      padding: 0.2vh 0.8vw;
+    }
+    .remote .slide-counter {
+      color: rgba(255,255,255,0.5);
+      font-size: 1.8vh;
+      font-weight: 400;
+      margin: 0 0.4vw;
+      letter-spacing: 0.5px;
     }
 
-    /* Responsive tweaks */
+    /* Responsive */
     @media (max-width: 768px) {
       .row { flex-direction: column; height: auto; gap: 2vh; }
-      .centre-col { max-width: 90vw; height: 42vh; }
-      .chart-wrapper { width: 55%; max-height: 28vh; }
-      .centre-value .number { font-size: 5vh; }
-      .metric-title { font-size: 3.5vh; }
+      .centre-card { height: 42vh; }
+      .chart-container { width: 50%; max-height: 28vh; }
+      .centre-overlay .number { font-size: 5vh; }
+      .metric-header h2 { font-size: 3.5vh; }
     }
   </style>
 </head>
@@ -202,102 +262,108 @@
 <div class="slides" id="slidesContainer"></div>
 
 <div class="remote" id="remoteControl">
-  <button id="prevBtn" title="Previous">◀</button>
+  <button id="prevBtn" title="Previous">‹</button>
   <button id="pauseBtn" class="pause-btn" title="Pause/Play">⏸</button>
-  <button id="nextBtn" title="Next">▶</button>
-  <span style="color:#94a3b8;margin:0 0.6vw;">|</span>
-  <span id="dotsContainer" style="display:flex;gap:0.4vw;align-items:center;"></span>
+  <button id="nextBtn" title="Next">›</button>
+  <span class="slide-counter" id="slideCounter">1 / 3</span>
+  <span id="dotsContainer" style="display:flex;gap:0.3vw;align-items:center;"></span>
 </div>
 
 <script>
   (async function() {
-    // --- CONFIG ---
-    const SLIDE_INTERVAL = 15000; // 15 seconds
+    const SLIDE_INTERVAL = 15000;
     let currentSlide = 0;
     let slidesData = [];
     let intervalId = null;
     let isPaused = false;
 
-    // --- FETCH DATA ---
+    // Fetch data
     let data;
     try {
-      const res = await fetch('data.json');
+      const res = await fetch('data.json?t=' + Date.now());
       data = await res.json();
     } catch(e) {
-      document.body.innerHTML = '<h1 style="color:red;text-align:center;margin-top:20vh;">Error loading data.json</h1>';
+      document.body.innerHTML = '<div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:sans-serif;color:#b91c1c;font-size:2rem;">⚠️ Error loading data.json</div>';
       return;
     }
 
     const targets = data.targets;
     const centres = data.centres;
-
-    // Metric list (order of slides)
     const metricKeys = ['SIS', 'IFSR', 'CHT'];
     const metricLabels = {
-      SIS: 'SIS (%)',
-      IFSR: 'IFSR (%)',
-      CHT: 'CHT (sec)'
+      SIS: 'SIS',
+      IFSR: 'IFSR',
+      CHT: 'CHT'
     };
-    // Direction: true = higher is better, false = lower is better
+    const metricUnits = {
+      SIS: '%',
+      IFSR: '%',
+      CHT: 's'
+    };
     const higherIsBetter = { SIS: true, IFSR: true, CHT: false };
 
-    // --- BUILD SLIDES ---
     const container = document.getElementById('slidesContainer');
     const dotsContainer = document.getElementById('dotsContainer');
+    const slideCounter = document.getElementById('slideCounter');
 
     metricKeys.forEach((metricKey, slideIndex) => {
       const slide = document.createElement('div');
       slide.className = 'slide' + (slideIndex === 0 ? ' active' : '');
       slide.dataset.index = slideIndex;
 
-      // Metric title
-      const title = document.createElement('div');
-      title.className = 'metric-title';
-      title.textContent = metricLabels[metricKey] || metricKey;
-      slide.appendChild(title);
+      // Header
+      const header = document.createElement('div');
+      header.className = 'metric-header';
+      header.innerHTML = `
+        <span class="icon">${metricKey === 'SIS' ? '📊' : metricKey === 'IFSR' ? '🎯' : '⏱️'}</span>
+        <h2>${metricLabels[metricKey]}</h2>
+        <span class="badge">${metricUnits[metricKey]}</span>
+      `;
+      slide.appendChild(header);
 
-      // Row for two centres
       const row = document.createElement('div');
       row.className = 'row';
 
       centres.forEach((centre) => {
-        const col = document.createElement('div');
-        col.className = 'centre-col';
+        const card = document.createElement('div');
+        card.className = 'centre-card';
 
-        // Centre name
-        const name = document.createElement('div');
-        name.className = 'centre-name';
-        name.style.color = centre.colour;
-        name.textContent = centre.name;
-        col.appendChild(name);
+        // Logo / name
+        const logo = document.createElement('div');
+        logo.className = 'logo';
+        logo.innerHTML = `<span class="dot" style="background:${centre.colour};"></span> ${centre.name}`;
+        card.appendChild(logo);
 
-        // Chart wrapper
-        const wrapper = document.createElement('div');
-        wrapper.className = 'chart-wrapper';
+        // Chart
+        const chartWrapper = document.createElement('div');
+        chartWrapper.className = 'chart-container';
         const canvas = document.createElement('canvas');
         canvas.id = `chart-${centre.name}-${metricKey}`;
-        wrapper.appendChild(canvas);
+        chartWrapper.appendChild(canvas);
 
-        // Overlay for centre value + trend
+        // Overlay
         const overlay = document.createElement('div');
-        overlay.className = 'centre-value';
+        overlay.className = 'centre-overlay';
         overlay.id = `overlay-${centre.name}-${metricKey}`;
         overlay.innerHTML = `
           <span class="number">—</span>
           <span class="trend"></span>
         `;
-        wrapper.appendChild(overlay);
+        chartWrapper.appendChild(overlay);
+        card.appendChild(chartWrapper);
 
-        // Target label
+        // Target info
         const targetVal = targets[metricKey];
-        const targetLabel = document.createElement('div');
-        targetLabel.className = 'target-label';
-        targetLabel.innerHTML = `🎯 Target: <span>${metricKey === 'CHT' ? targetVal : targetVal + '%'}</span>`;
-        col.appendChild(targetLabel);
+        const targetInfo = document.createElement('div');
+        targetInfo.className = 'target-info';
+        targetInfo.innerHTML = `
+          <span class="target-icon">🎯</span>
+          Target: <strong>${targetVal}${metricUnits[metricKey]}</strong>
+        `;
+        card.appendChild(targetInfo);
 
-        row.appendChild(col);
+        row.appendChild(card);
 
-        // Store refs for chart init
         slidesData.push({
           slideIndex,
           centreName: centre.name,
@@ -308,7 +374,8 @@
           target: targetVal,
           current: centre.metrics[metricKey].current,
           previous: centre.metrics[metricKey].previous,
-          higherIsBetter: higherIsBetter[metricKey]
+          higherIsBetter: higherIsBetter[metricKey],
+          unit: metricUnits[metricKey]
         });
       });
 
@@ -325,16 +392,14 @@
       dotsContainer.appendChild(dot);
     });
 
-    // --- INIT CHARTS ---
+    // --- Chart initialisation ---
     const charts = [];
-
     slidesData.forEach((item) => {
       const ctx = item.canvas.getContext('2d');
       const current = item.current;
       const target = item.target;
       const isHigher = item.higherIsBetter;
 
-      // Determine if metric is met
       let met;
       if (isHigher) {
         met = current >= target;
@@ -342,21 +407,18 @@
         met = current <= target;
       }
 
-      // Arc value: how much of the doughnut is filled (capped at 100%)
       let fillPercent;
       if (isHigher) {
         fillPercent = Math.min((current / target) * 100, 100);
       } else {
-        // For CHT: lower is better, we invert: if current <= target => 100%, else percentage of target/current
         if (current <= target) {
           fillPercent = 100;
         } else {
-          // e.g. target 580, current 829 => 580/829 = ~70%
           fillPercent = Math.min((target / current) * 100, 100);
         }
       }
 
-      const colour = met ? '#10b981' : '#f59e0b'; // green / amber
+      const colour = met ? '#10b981' : '#f59e0b';
 
       const chart = new Chart(ctx, {
         type: 'doughnut',
@@ -365,13 +427,13 @@
             data: [fillPercent, 100 - fillPercent],
             backgroundColor: [colour, '#e9edf2'],
             borderWidth: 0,
-            borderRadius: 6
+            borderRadius: 8,
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: true,
-          cutout: '72%',
+          cutout: '70%',
           plugins: {
             tooltip: { enabled: false },
             legend: { display: false }
@@ -380,28 +442,17 @@
             animateRotate: true,
             duration: 800
           }
-        },
-        plugins: [{
-          id: 'doughnutCenterText',
-          // we use our own overlay, so no need to draw text here
-        }]
+        }
       });
-
       charts.push(chart);
       item.chart = chart;
-      item.chartInstance = chart;
 
-      // Update overlay with value and trend
+      // Update overlay
       const overlay = item.overlay;
       const numEl = overlay.querySelector('.number');
       const trendEl = overlay.querySelector('.trend');
 
-      let displayValue;
-      if (item.metricKey === 'CHT') {
-        displayValue = current;
-      } else {
-        displayValue = current + '%';
-      }
+      let displayValue = current + (item.unit === '%' ? '%' : '');
       numEl.textContent = displayValue;
 
       // Trend
@@ -416,7 +467,6 @@
         const pctChange = (diff / Math.abs(prev)) * 100;
         const sign = diff > 0 ? '+' : '';
         trendText = `${sign}${pctChange.toFixed(1)}%`;
-        // For higher-is-better: up is good, down is bad. For CHT: reversed.
         if (isHigher) {
           trendClass = diff > 0 ? 'up' : 'down';
         } else {
@@ -427,23 +477,18 @@
       trendEl.className = `trend ${trendClass}`;
     });
 
-    // --- SLIDE NAVIGATION ---
+    // --- Navigation ---
     function goToSlide(index) {
       if (index < 0) index = 0;
       if (index >= metricKeys.length) index = metricKeys.length - 1;
       currentSlide = index;
-
-      // Update slides
-      const slides = document.querySelectorAll('.slide');
-      slides.forEach((s, i) => {
+      document.querySelectorAll('.slide').forEach((s, i) => {
         s.classList.toggle('active', i === index);
       });
-
-      // Update dots
-      const dots = dotsContainer.querySelectorAll('.dot');
-      dots.forEach((d, i) => {
+      document.querySelectorAll('.dot').forEach((d, i) => {
         d.classList.toggle('active-dot', i === index);
       });
+      slideCounter.textContent = `${index+1} / ${metricKeys.length}`;
     }
 
     function nextSlide() {
@@ -456,7 +501,6 @@
       goToSlide(prev);
     }
 
-    // --- AUTO PLAY ---
     function startAutoPlay() {
       if (intervalId) clearInterval(intervalId);
       intervalId = setInterval(nextSlide, SLIDE_INTERVAL);
@@ -475,28 +519,22 @@
       }
     }
 
-    // --- REMOTE CONTROLS ---
     document.getElementById('nextBtn').addEventListener('click', () => { clearInterval(intervalId); nextSlide(); startAutoPlay(); });
     document.getElementById('prevBtn').addEventListener('click', () => { clearInterval(intervalId); prevSlide(); startAutoPlay(); });
     document.getElementById('pauseBtn').addEventListener('click', togglePause);
 
-    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); clearInterval(intervalId); nextSlide(); startAutoPlay(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); clearInterval(intervalId); prevSlide(); startAutoPlay(); }
       if (e.key === 'p' || e.key === 'P') { e.preventDefault(); togglePause(); }
     });
 
-    // --- START ---
     goToSlide(0);
     startAutoPlay();
 
-    // Resize charts on window resize (they auto-resize, but we force a redraw)
     window.addEventListener('resize', () => {
       charts.forEach(ch => ch.resize());
     });
-
-    // Update the centre numbers to be huge via CSS (already styled)
   })();
 </script>
 </body>
