@@ -3,22 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TP vs WNS | Performance Leaderboard</title>
+  <title>TP vs WNS | Executive Leaderboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f2f5f9;
-      background-image: radial-gradient(circle at 20% 30%, rgba(26, 115, 232, 0.03) 0%, transparent 60%),
-                        radial-gradient(circle at 80% 70%, rgba(245, 124, 0, 0.03) 0%, transparent 60%);
+      background: #0a0f1c;
       height: 100vh;
       width: 100vw;
       overflow: hidden;
@@ -26,14 +20,39 @@
       flex-direction: column;
     }
 
-    /* Slides container */
+    /* Background glow */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -30%;
+      left: -20%;
+      width: 70%;
+      height: 80%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -30%;
+      right: -20%;
+      width: 70%;
+      height: 80%;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .slides {
       flex: 1;
       width: 100%;
       position: relative;
+      z-index: 1;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 2vh 3vw;
     }
 
     .slide {
@@ -44,154 +63,169 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      gap: 2vh;
+      padding: 2.5vh 3vw;
       opacity: 0;
-      transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
       pointer-events: none;
-      padding: 2vh 4vw;
     }
     .slide.active {
       opacity: 1;
       pointer-events: auto;
     }
 
-    /* Metric header */
+    /* Metric header (top of slide) */
     .metric-header {
       display: flex;
       align-items: center;
       gap: 1.2vw;
-      margin-bottom: 2vh;
+      padding-left: 0.5vw;
     }
-    .metric-header .icon {
-      font-size: 4vh;
+    .metric-header .icon-svg {
+      width: 3.2vh;
+      height: 3.2vh;
+      color: rgba(255,255,255,0.3);
     }
     .metric-header h2 {
-      font-size: 5vh;
-      font-weight: 700;
-      color: #0b1a33;
-      letter-spacing: -0.02em;
-      margin: 0;
-    }
-    .metric-header .badge {
-      background: #e6edf5;
-      padding: 0.3vh 1.2vw;
-      border-radius: 40px;
-      font-size: 2.2vh;
+      font-size: 4.2vh;
       font-weight: 600;
-      color: #1e3a6b;
-      margin-left: 0.5vw;
+      color: #f1f5f9;
+      letter-spacing: -0.02em;
+    }
+    .metric-header .unit-badge {
+      font-size: 2vh;
+      font-weight: 500;
+      color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.06);
+      padding: 0.2vh 1.2vw;
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Row */
-    .row {
+    /* Two cards stacked vertically */
+    .card-row {
+      flex: 1;
       display: flex;
-      flex-direction: row;
-      width: 100%;
-      max-width: 1400px;
-      height: 65vh;
-      gap: 3vw;
-      justify-content: center;
-      align-items: stretch;
+      flex-direction: column;
+      gap: 2vh;
+      min-height: 0;
     }
 
     .centre-card {
       flex: 1;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(2px);
-      border-radius: 3.5vh;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06), 0 8px 20px rgba(0,0,0,0.02);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      border-radius: 2.8vh;
+      border: 1px solid rgba(255,255,255,0.06);
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      align-items: center;
+      padding: 1.5vh 2.5vw;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+    /* Brand accent border */
+    .centre-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 15%;
+      height: 70%;
+      width: 0.6vh;
+      border-radius: 0 6px 6px 0;
+      background: var(--brand-colour);
+    }
+    .centre-card.tp { --brand-colour: #3b82f6; }
+    .centre-card.wns { --brand-colour: #f59e0b; }
+
+    /* Left: chart */
+    .chart-area {
+      flex: 0 0 28%;
+      aspect-ratio: 1/1;
+      max-height: 100%;
+      position: relative;
+      display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2vh 1.5vw;
-      position: relative;
-      transition: transform 0.2s;
-      border: 1px solid rgba(255,255,255,0.5);
     }
-    .centre-card:hover {
-      transform: scale(1.01);
-    }
-    .centre-card .logo {
-      font-size: 2.8vh;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.5vh;
-      display: flex;
-      align-items: center;
-      gap: 0.6vw;
-    }
-    .centre-card .logo .dot {
-      display: inline-block;
-      width: 1.2vh;
-      height: 1.2vh;
-      border-radius: 50%;
-    }
-
-    .chart-container {
-      position: relative;
-      width: 65%;
-      max-height: 45vh;
-      aspect-ratio: 1/1;
-      margin: 0.5vh 0;
-    }
-    .chart-container canvas {
+    .chart-area canvas {
       width: 100% !important;
       height: 100% !important;
     }
 
-    /* Overlay for centre value + trend */
-    .centre-overlay {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      pointer-events: none;
+    /* Right: details */
+    .details-area {
+      flex: 1;
+      padding-left: 2.5vw;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      width: 80%;
+      gap: 0.5vh;
     }
-    .centre-overlay .number {
-      font-size: 7.5vh;
-      font-weight: 800;
-      line-height: 1;
-      color: #0b1a33;
-      letter-spacing: -0.02em;
-    }
-    .centre-overlay .trend {
-      font-size: 2.8vh;
+    .details-area .centre-name {
+      font-size: 2.6vh;
       font-weight: 600;
-      margin-top: -0.2vh;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 0.2vh;
     }
-    .trend.up { color: #10b981; }
-    .trend.down { color: #ef4444; }
+    .details-area .centre-name .colour-dot {
+      display: inline-block;
+      width: 1.4vh;
+      height: 1.4vh;
+      border-radius: 50%;
+      margin-right: 0.6vw;
+      vertical-align: middle;
+    }
+    .details-area .main-value {
+      font-size: 9vh;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 1vw;
+    }
+    .details-area .main-value .trend {
+      font-size: 3.2vh;
+      font-weight: 600;
+      margin-left: 0.2vw;
+    }
+    .trend.up { color: #4ade80; }
+    .trend.down { color: #f87171; }
     .trend.flat { color: #94a3b8; }
 
-    .target-info {
-      margin-top: 1vh;
+    .details-area .target-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5vw;
+      margin-top: 0.8vh;
       font-size: 2.2vh;
-      font-weight: 500;
-      color: #475569;
-      background: #f1f5f9;
-      padding: 0.4vh 1.8vw;
-      border-radius: 40px;
-      display: inline-flex;
+      color: rgba(255,255,255,0.4);
+    }
+    .details-area .target-row .target-badge {
+      display: flex;
       align-items: center;
       gap: 0.4vw;
+      background: rgba(255,255,255,0.05);
+      padding: 0.3vh 1.2vw;
+      border-radius: 40px;
+      border: 1px solid rgba(255,255,255,0.04);
     }
-    .target-info strong {
-      font-weight: 700;
-      color: #0b1a33;
+    .details-area .target-row .target-badge .t-icon {
+      width: 1.8vh;
+      height: 1.8vh;
     }
-    .target-info .target-icon {
-      font-size: 1.8vh;
+    .details-area .target-row .target-badge strong {
+      color: rgba(255,255,255,0.7);
+      font-weight: 600;
     }
 
-    /* Footer / remote */
+    /* Remote control */
     .remote {
       position: fixed;
       bottom: 2.5vh;
@@ -199,19 +233,20 @@
       transform: translateX(-50%);
       display: flex;
       gap: 1.2vw;
-      background: rgba(11, 26, 51, 0.7);
-      backdrop-filter: blur(12px);
-      padding: 0.6vh 2vw;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(16px);
+      padding: 0.6vh 1.8vw;
       border-radius: 60px;
       z-index: 999;
       align-items: center;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
     }
     .remote button {
       background: none;
       border: none;
-      color: rgba(255,255,255,0.8);
-      font-size: 2.8vh;
+      color: rgba(255,255,255,0.6);
+      font-size: 2.6vh;
       cursor: pointer;
       padding: 0.2vh 0.6vw;
       border-radius: 40px;
@@ -220,40 +255,38 @@
       line-height: 1;
     }
     .remote button:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255,255,255,0.08);
       color: #fff;
     }
     .remote .dot {
-      color: rgba(255,255,255,0.3);
-      font-size: 2.2vh;
-      margin: 0 0.2vw;
+      color: rgba(255,255,255,0.2);
+      font-size: 2vh;
+      margin: 0 0.15vw;
       cursor: pointer;
       transition: 0.2s;
       line-height: 1;
     }
     .remote .dot.active-dot {
       color: #ffffff;
-      font-size: 3vh;
+      font-size: 2.8vh;
     }
-    .remote .pause-btn {
-      font-size: 2.2vh;
-      padding: 0.2vh 0.8vw;
-    }
+    .remote .pause-btn { font-size: 2vh; padding: 0.2vh 0.6vw; }
     .remote .slide-counter {
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.3);
       font-size: 1.8vh;
       font-weight: 400;
-      margin: 0 0.4vw;
+      margin: 0 0.2vw;
       letter-spacing: 0.5px;
     }
 
-    /* Responsive */
     @media (max-width: 768px) {
-      .row { flex-direction: column; height: auto; gap: 2vh; }
-      .centre-card { height: 42vh; }
-      .chart-container { width: 50%; max-height: 28vh; }
-      .centre-overlay .number { font-size: 5vh; }
-      .metric-header h2 { font-size: 3.5vh; }
+      .slide { padding: 1.5vh 2vw; gap: 1.5vh; }
+      .centre-card { flex-direction: column; padding: 1.5vh; }
+      .chart-area { flex: 0 0 40%; width: 40%; }
+      .details-area { padding-left: 0; align-items: center; text-align: center; }
+      .details-area .main-value { font-size: 5vh; flex-wrap: wrap; justify-content: center; }
+      .metric-header h2 { font-size: 2.8vh; }
+      .remote { padding: 0.4vh 3vw; gap: 2vw; }
     }
   </style>
 </head>
@@ -266,7 +299,7 @@
   <button id="pauseBtn" class="pause-btn" title="Pause/Play">⏸</button>
   <button id="nextBtn" title="Next">›</button>
   <span class="slide-counter" id="slideCounter">1 / 3</span>
-  <span id="dotsContainer" style="display:flex;gap:0.3vw;align-items:center;"></span>
+  <span id="dotsContainer" style="display:flex;gap:0.2vw;align-items:center;"></span>
 </div>
 
 <script>
@@ -281,26 +314,26 @@
     let data;
     try {
       const res = await fetch('data.json?t=' + Date.now());
+      if (!res.ok) throw new Error('Network error');
       data = await res.json();
     } catch(e) {
-      document.body.innerHTML = '<div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:sans-serif;color:#b91c1c;font-size:2rem;">⚠️ Error loading data.json</div>';
+      document.body.innerHTML = `<div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#f87171;font-size:2.5rem;background:#0a0f1c;">⚠️ Could not load data.json</div>`;
       return;
     }
 
     const targets = data.targets;
     const centres = data.centres;
     const metricKeys = ['SIS', 'IFSR', 'CHT'];
-    const metricLabels = {
-      SIS: 'SIS',
-      IFSR: 'IFSR',
-      CHT: 'CHT'
-    };
-    const metricUnits = {
-      SIS: '%',
-      IFSR: '%',
-      CHT: 's'
-    };
+    const metricLabels = { SIS: 'SIS', IFSR: 'IFSR', CHT: 'CHT' };
+    const metricUnits = { SIS: '%', IFSR: '%', CHT: 's' };
     const higherIsBetter = { SIS: true, IFSR: true, CHT: false };
+
+    // SVG icons (no emojis)
+    const svgIcons = {
+      SIS: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12v-2a5 5 0 0 0-5-5H8a5 5 0 0 0-5 5v2"/><circle cx="12" cy="16" r="5"/><path d="M12 11v5"/><path d="M9 13l3 3 3-3"/></svg>`,
+      IFSR: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4"/><path d="M12 22v-4"/><path d="M2 12h4"/><path d="M22 12h-4"/></svg>`,
+      CHT: `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+    };
 
     const container = document.getElementById('slidesContainer');
     const dotsContainer = document.getElementById('dotsContainer');
@@ -309,77 +342,76 @@
     metricKeys.forEach((metricKey, slideIndex) => {
       const slide = document.createElement('div');
       slide.className = 'slide' + (slideIndex === 0 ? ' active' : '');
-      slide.dataset.index = slideIndex;
 
       // Header
       const header = document.createElement('div');
       header.className = 'metric-header';
       header.innerHTML = `
-        <span class="icon">${metricKey === 'SIS' ? '📊' : metricKey === 'IFSR' ? '🎯' : '⏱️'}</span>
+        ${svgIcons[metricKey]}
         <h2>${metricLabels[metricKey]}</h2>
-        <span class="badge">${metricUnits[metricKey]}</span>
+        <span class="unit-badge">${metricUnits[metricKey]}</span>
       `;
       slide.appendChild(header);
 
-      const row = document.createElement('div');
-      row.className = 'row';
+      const cardRow = document.createElement('div');
+      cardRow.className = 'card-row';
 
       centres.forEach((centre) => {
         const card = document.createElement('div');
-        card.className = 'centre-card';
+        card.className = `centre-card ${centre.name.toLowerCase()}`;
 
-        // Logo / name
-        const logo = document.createElement('div');
-        logo.className = 'logo';
-        logo.innerHTML = `<span class="dot" style="background:${centre.colour};"></span> ${centre.name}`;
-        card.appendChild(logo);
-
-        // Chart
-        const chartWrapper = document.createElement('div');
-        chartWrapper.className = 'chart-container';
+        // Chart area
+        const chartArea = document.createElement('div');
+        chartArea.className = 'chart-area';
         const canvas = document.createElement('canvas');
         canvas.id = `chart-${centre.name}-${metricKey}`;
-        chartWrapper.appendChild(canvas);
+        chartArea.appendChild(canvas);
 
-        // Overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'centre-overlay';
-        overlay.id = `overlay-${centre.name}-${metricKey}`;
-        overlay.innerHTML = `
-          <span class="number">—</span>
-          <span class="trend"></span>
+        // Details area
+        const details = document.createElement('div');
+        details.className = 'details-area';
+        const dotColour = centre.colour;
+        details.innerHTML = `
+          <div class="centre-name">
+            <span class="colour-dot" style="background:${dotColour};"></span>
+            ${centre.name}
+          </div>
+          <div class="main-value">
+            <span id="val-${centre.name}-${metricKey}">—</span>
+            <span class="trend" id="trend-${centre.name}-${metricKey}"></span>
+          </div>
+          <div class="target-row">
+            <span class="target-badge">
+              <svg class="t-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              Target: <strong>${targets[metricKey]}${metricUnits[metricKey]}</strong>
+            </span>
+            <span style="font-size:1.8vh;color:rgba(255,255,255,0.2);">|</span>
+            <span style="font-size:1.8vh;color:rgba(255,255,255,0.3);">${metricKey === 'CHT' ? '↓ lower is better' : '↑ higher is better'}</span>
+          </div>
         `;
-        chartWrapper.appendChild(overlay);
-        card.appendChild(chartWrapper);
 
-        // Target info
-        const targetVal = targets[metricKey];
-        const targetInfo = document.createElement('div');
-        targetInfo.className = 'target-info';
-        targetInfo.innerHTML = `
-          <span class="target-icon">🎯</span>
-          Target: <strong>${targetVal}${metricUnits[metricKey]}</strong>
-        `;
-        card.appendChild(targetInfo);
+        card.appendChild(chartArea);
+        card.appendChild(details);
+        cardRow.appendChild(card);
 
-        row.appendChild(card);
-
+        // Store for chart init
         slidesData.push({
           slideIndex,
           centreName: centre.name,
           colour: centre.colour,
           metricKey,
           canvas,
-          overlay,
-          target: targetVal,
+          target: targets[metricKey],
           current: centre.metrics[metricKey].current,
           previous: centre.metrics[metricKey].previous,
           higherIsBetter: higherIsBetter[metricKey],
-          unit: metricUnits[metricKey]
+          unit: metricUnits[metricKey],
+          valueEl: document.getElementById(`val-${centre.name}-${metricKey}`),
+          trendEl: document.getElementById(`trend-${centre.name}-${metricKey}`)
         });
       });
 
-      slide.appendChild(row);
+      slide.appendChild(cardRow);
       container.appendChild(slide);
 
       // Dot
@@ -392,7 +424,7 @@
       dotsContainer.appendChild(dot);
     });
 
-    // --- Chart initialisation ---
+    // --- Init Charts ---
     const charts = [];
     slidesData.forEach((item) => {
       const ctx = item.canvas.getContext('2d');
@@ -401,80 +433,60 @@
       const isHigher = item.higherIsBetter;
 
       let met;
-      if (isHigher) {
-        met = current >= target;
-      } else {
-        met = current <= target;
-      }
+      if (isHigher) met = current >= target;
+      else met = current <= target;
 
       let fillPercent;
       if (isHigher) {
         fillPercent = Math.min((current / target) * 100, 100);
       } else {
-        if (current <= target) {
-          fillPercent = 100;
-        } else {
-          fillPercent = Math.min((target / current) * 100, 100);
-        }
+        if (current <= target) fillPercent = 100;
+        else fillPercent = Math.min((target / current) * 100, 100);
       }
 
-      const colour = met ? '#10b981' : '#f59e0b';
+      const colour = met ? '#4ade80' : '#f59e0b';
 
       const chart = new Chart(ctx, {
         type: 'doughnut',
         data: {
           datasets: [{
             data: [fillPercent, 100 - fillPercent],
-            backgroundColor: [colour, '#e9edf2'],
+            backgroundColor: [colour, 'rgba(255,255,255,0.06)'],
             borderWidth: 0,
-            borderRadius: 8,
+            borderRadius: 8
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: true,
-          cutout: '70%',
-          plugins: {
-            tooltip: { enabled: false },
-            legend: { display: false }
-          },
-          animation: {
-            animateRotate: true,
-            duration: 800
-          }
+          cutout: '72%',
+          plugins: { tooltip: { enabled: false }, legend: { display: false } },
+          animation: { animateRotate: true, duration: 800 }
         }
       });
       charts.push(chart);
       item.chart = chart;
 
-      // Update overlay
-      const overlay = item.overlay;
-      const numEl = overlay.querySelector('.number');
-      const trendEl = overlay.querySelector('.trend');
+      // Update value & trend
+      const displayVal = current + (item.unit === '%' ? '%' : '');
+      if (item.valueEl) item.valueEl.textContent = displayVal;
 
-      let displayValue = current + (item.unit === '%' ? '%' : '');
-      numEl.textContent = displayValue;
-
-      // Trend
       const prev = item.previous;
       const diff = current - prev;
-      let trendText = '';
-      let trendClass = 'flat';
+      let trendText = '', trendClass = 'flat';
       if (Math.abs(diff) < 0.01) {
         trendText = '→ 0%';
-        trendClass = 'flat';
       } else {
         const pctChange = (diff / Math.abs(prev)) * 100;
         const sign = diff > 0 ? '+' : '';
         trendText = `${sign}${pctChange.toFixed(1)}%`;
-        if (isHigher) {
-          trendClass = diff > 0 ? 'up' : 'down';
-        } else {
-          trendClass = diff < 0 ? 'up' : 'down';
-        }
+        if (isHigher) trendClass = diff > 0 ? 'up' : 'down';
+        else trendClass = diff < 0 ? 'up' : 'down';
       }
-      trendEl.textContent = trendText;
-      trendEl.className = `trend ${trendClass}`;
+      if (item.trendEl) {
+        item.trendEl.textContent = trendText;
+        item.trendEl.className = `trend ${trendClass}`;
+      }
     });
 
     // --- Navigation ---
@@ -482,24 +494,13 @@
       if (index < 0) index = 0;
       if (index >= metricKeys.length) index = metricKeys.length - 1;
       currentSlide = index;
-      document.querySelectorAll('.slide').forEach((s, i) => {
-        s.classList.toggle('active', i === index);
-      });
-      document.querySelectorAll('.dot').forEach((d, i) => {
-        d.classList.toggle('active-dot', i === index);
-      });
+      document.querySelectorAll('.slide').forEach((s, i) => s.classList.toggle('active', i === index));
+      document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active-dot', i === index));
       slideCounter.textContent = `${index+1} / ${metricKeys.length}`;
     }
 
-    function nextSlide() {
-      const next = (currentSlide + 1) % metricKeys.length;
-      goToSlide(next);
-    }
-
-    function prevSlide() {
-      const prev = (currentSlide - 1 + metricKeys.length) % metricKeys.length;
-      goToSlide(prev);
-    }
+    function nextSlide() { goToSlide((currentSlide + 1) % metricKeys.length); }
+    function prevSlide() { goToSlide((currentSlide - 1 + metricKeys.length) % metricKeys.length); }
 
     function startAutoPlay() {
       if (intervalId) clearInterval(intervalId);
@@ -507,22 +508,14 @@
       isPaused = false;
       document.getElementById('pauseBtn').textContent = '⏸';
     }
-
     function togglePause() {
-      if (isPaused) {
-        startAutoPlay();
-      } else {
-        clearInterval(intervalId);
-        intervalId = null;
-        isPaused = true;
-        document.getElementById('pauseBtn').textContent = '▶';
-      }
+      if (isPaused) { startAutoPlay(); }
+      else { clearInterval(intervalId); intervalId = null; isPaused = true; document.getElementById('pauseBtn').textContent = '▶'; }
     }
 
     document.getElementById('nextBtn').addEventListener('click', () => { clearInterval(intervalId); nextSlide(); startAutoPlay(); });
     document.getElementById('prevBtn').addEventListener('click', () => { clearInterval(intervalId); prevSlide(); startAutoPlay(); });
     document.getElementById('pauseBtn').addEventListener('click', togglePause);
-
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); clearInterval(intervalId); nextSlide(); startAutoPlay(); }
       if (e.key === 'ArrowLeft') { e.preventDefault(); clearInterval(intervalId); prevSlide(); startAutoPlay(); }
@@ -531,10 +524,7 @@
 
     goToSlide(0);
     startAutoPlay();
-
-    window.addEventListener('resize', () => {
-      charts.forEach(ch => ch.resize());
-    });
+    window.addEventListener('resize', () => charts.forEach(ch => ch.resize()));
   })();
 </script>
 </body>
