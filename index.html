@@ -384,31 +384,31 @@
       font-weight: 600;
     }
 
-    /* SUMMARY SLIDE – clean & reliable */
-    .summary-grid {
+    /* ===== SUMMARY SLIDE – VERTICAL STACK (clean & reliable) ===== */
+    .summary-grid-vertical {
       flex: 1;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
+      flex-direction: column;
       gap: 2vh;
       width: 100%;
       height: 100%;
-      align-content: stretch;
     }
 
-    .summary-card {
+    .summary-card-vertical {
+      flex: 1;
       background: var(--card-bg);
       backdrop-filter: blur(8px);
       border-radius: 2.8vh;
       border: 1px solid var(--card-border);
       box-shadow: var(--shadow);
-      padding: 2vh 1.8vw;
+      padding: 1.5vh 2vw;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
+      justify-content: center;
       position: relative;
       overflow: hidden;
     }
-    .summary-card::after {
+    .summary-card-vertical::after {
       content: '';
       position: absolute;
       top: 0;
@@ -418,18 +418,19 @@
       background: linear-gradient(90deg, #3b82f6, #f59e0b);
       opacity: 0.3;
     }
-    .summary-card .metric-title {
+
+    .summary-card-vertical .metric-title {
       font-size: 2.8vh;
       font-weight: 700;
       color: var(--text-primary);
       letter-spacing: -0.01em;
-      margin-bottom: 1.2vh;
+      margin-bottom: 0.8vh;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
     }
-    .summary-card .metric-title .unit {
+    .summary-card-vertical .metric-title .unit {
       font-size: 1.8vh;
       font-weight: 500;
       color: var(--text-muted);
@@ -439,26 +440,26 @@
       border: 1px solid var(--badge-border);
     }
 
-    .summary-row {
+    .summary-row-vertical {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.8vh 0;
+      padding: 0.6vh 0;
       border-bottom: 1px solid var(--badge-border);
       flex-shrink: 0;
     }
-    .summary-row:last-child { border-bottom: none; }
+    .summary-row-vertical:last-child { border-bottom: none; }
 
-    .summary-row .centre-info {
+    .summary-row-vertical .centre-info {
       display: flex;
       align-items: center;
       gap: 0.6vw;
       font-weight: 600;
       color: var(--text-secondary);
       font-size: 2vh;
-      flex: 0 0 20%;
+      flex: 0 0 15%;
     }
-    .summary-row .centre-info .dot {
+    .summary-row-vertical .centre-info .dot {
       width: 1.4vh;
       height: 1.4vh;
       border-radius: 50%;
@@ -466,31 +467,31 @@
       flex-shrink: 0;
     }
 
-    .summary-row .values {
+    .summary-row-vertical .values {
       display: flex;
       align-items: center;
-      gap: 1vw;
+      gap: 1.5vw;
       flex: 1;
       justify-content: flex-end;
       flex-wrap: wrap;
     }
-    .summary-row .values .current {
+    .summary-row-vertical .values .current {
       font-size: 2.8vh;
       font-weight: 700;
       color: var(--text-primary);
     }
-    .summary-row .values .change {
+    .summary-row-vertical .values .change {
       font-size: 2vh;
       font-weight: 500;
-      min-width: 4vw;
+      min-width: 4.5vw;
     }
-    .summary-row .values .change.up { color: #10b981; }
-    .summary-row .values .change.down { color: #ef4444; }
-    .summary-row .values .change.flat { color: var(--text-muted); }
+    .summary-row-vertical .values .change.up { color: #10b981; }
+    .summary-row-vertical .values .change.down { color: #ef4444; }
+    .summary-row-vertical .values .change.flat { color: var(--text-muted); }
 
-    .summary-row .values .gap-badge {
-      font-size: 1.6vh;
-      padding: 0.2vh 0.8vw;
+    .summary-row-vertical .values .gap-badge {
+      font-size: 1.8vh;
+      padding: 0.2vh 1vw;
       border-radius: 30px;
       background: var(--badge-bg);
       border: 1px solid var(--badge-border);
@@ -500,18 +501,18 @@
       gap: 0.2vw;
       white-space: nowrap;
     }
-    .summary-row .values .gap-badge.above { color: #10b981; border-color: #10b981; background: rgba(16,185,129,0.08); }
-    .summary-row .values .gap-badge.below { color: #f59e0b; border-color: #f59e0b; background: rgba(245,158,11,0.08); }
-    .summary-row .values .gap-badge.well-below { color: #ef4444; border-color: #ef4444; background: rgba(239,68,68,0.08); }
+    .summary-row-vertical .values .gap-badge.above { color: #10b981; border-color: #10b981; background: rgba(16,185,129,0.08); }
+    .summary-row-vertical .values .gap-badge.below { color: #f59e0b; border-color: #f59e0b; background: rgba(245,158,11,0.08); }
+    .summary-row-vertical .values .gap-badge.well-below { color: #ef4444; border-color: #ef4444; background: rgba(239,68,68,0.08); }
 
-    .summary-row .bar-container {
-      flex: 0 0 18%;
+    .summary-row-vertical .bar-container {
+      flex: 0 0 15%;
       height: 0.8vh;
       background: var(--badge-bg);
       border-radius: 40px;
       overflow: hidden;
     }
-    .summary-row .bar-container .bar-fill {
+    .summary-row-vertical .bar-container .bar-fill {
       height: 100%;
       border-radius: 40px;
       transition: width 0.6s ease;
@@ -526,9 +527,8 @@
       .metric-header h2 { font-size: 2.8vh; }
       .metric-header .remote-inline { padding: 0.2vh 1.5vw; gap: 1vw; flex-wrap: wrap; }
       .metric-header .remote-inline .admin-link { border-left: none; padding-left: 0; margin-left: 0; }
-      .summary-grid { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); gap: 1.5vh; }
-      .summary-row .values { gap: 0.5vw; }
-      .summary-row .bar-container { display: none; }
+      .summary-row-vertical .values { gap: 0.8vw; }
+      .summary-row-vertical .bar-container { display: none; }
     }
 
     @media print {
@@ -536,7 +536,7 @@
       .slide { opacity: 1 !important; position: relative !important; display: block !important; }
       .slide:not(.active) { display: none !important; }
       .remote-inline { display: none !important; }
-      .centre-card, .summary-card { break-inside: avoid; }
+      .centre-card, .summary-card-vertical { break-inside: avoid; }
     }
   </style>
 </head>
@@ -742,7 +742,7 @@
         container.appendChild(slide);
       }
 
-      // ----- SUMMARY SLIDE (index 3) – simplified render -----
+      // ----- SUMMARY SLIDE (index 3) – VERTICAL STACK -----
       const summarySlide = document.createElement('div');
       summarySlide.className = 'slide';
       summarySlide.dataset.slideType = 'summary';
@@ -757,12 +757,12 @@
       summarySlide.appendChild(summaryHeader);
 
       const summaryGrid = document.createElement('div');
-      summaryGrid.className = 'summary-grid';
+      summaryGrid.className = 'summary-grid-vertical';
 
       const metricKeysSummary = ['SIS', 'IFSR', 'CHT'];
       metricKeysSummary.forEach((metricKey) => {
         const card = document.createElement('div');
-        card.className = 'summary-card';
+        card.className = 'summary-card-vertical';
         card.id = `summary-card-${metricKey}`;
         card.innerHTML = `
           <div class="metric-title">
@@ -937,7 +937,7 @@
       }
     }
 
-    // ----- Update summary (reliable render) -----
+    // ----- Update summary (vertical stack) -----
     function updateSummary() {
       const metricKeys = ['SIS', 'IFSR', 'CHT'];
       const centres = allData.centres;
@@ -979,7 +979,7 @@
           const barColor = (gap >= 0) ? '#10b981' : (gapAbs / (isHigher ? target : target*1.5) > 0.15 ? '#ef4444' : '#f59e0b');
 
           return `
-            <div class="summary-row">
+            <div class="summary-row-vertical">
               <span class="centre-info">
                 <span class="dot" style="background:${centre.colour};"></span>
                 ${centre.name}
