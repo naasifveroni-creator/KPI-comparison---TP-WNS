@@ -90,7 +90,6 @@
       pointer-events: auto;
     }
 
-    /* Metric header */
     .metric-header {
       display: flex;
       align-items: center;
@@ -132,7 +131,6 @@
     .metric-header .status-badge.below-target { color: #f59e0b; border-color: #f59e0b; }
     .metric-header .status-badge.well-below { color: #ef4444; border-color: #ef4444; }
 
-    /* Remote (clean, no print) */
     .metric-header .remote-inline {
       display: flex;
       align-items: center;
@@ -209,7 +207,6 @@
       background: var(--badge-bg);
     }
 
-    /* Metric slides */
     .card-row {
       flex: 1;
       display: flex;
@@ -387,7 +384,7 @@
       font-weight: 600;
     }
 
-    /* Summary slide – clean, no crowns */
+    /* SUMMARY SLIDE – clean & reliable */
     .summary-grid {
       flex: 1;
       display: grid;
@@ -407,8 +404,7 @@
       padding: 2vh 1.8vw;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.2s;
+      justify-content: flex-start;
       position: relative;
       overflow: hidden;
     }
@@ -431,6 +427,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
     }
     .summary-card .metric-title .unit {
       font-size: 1.8vh;
@@ -448,6 +445,7 @@
       justify-content: space-between;
       padding: 0.8vh 0;
       border-bottom: 1px solid var(--badge-border);
+      flex-shrink: 0;
     }
     .summary-row:last-child { border-bottom: none; }
 
@@ -458,21 +456,23 @@
       font-weight: 600;
       color: var(--text-secondary);
       font-size: 2vh;
-      flex: 0 0 25%;
+      flex: 0 0 20%;
     }
     .summary-row .centre-info .dot {
       width: 1.4vh;
       height: 1.4vh;
       border-radius: 50%;
       display: inline-block;
+      flex-shrink: 0;
     }
 
     .summary-row .values {
       display: flex;
       align-items: center;
-      gap: 1.5vw;
+      gap: 1vw;
       flex: 1;
       justify-content: flex-end;
+      flex-wrap: wrap;
     }
     .summary-row .values .current {
       font-size: 2.8vh;
@@ -482,14 +482,14 @@
     .summary-row .values .change {
       font-size: 2vh;
       font-weight: 500;
-      min-width: 4.5vw;
+      min-width: 4vw;
     }
     .summary-row .values .change.up { color: #10b981; }
     .summary-row .values .change.down { color: #ef4444; }
     .summary-row .values .change.flat { color: var(--text-muted); }
 
     .summary-row .values .gap-badge {
-      font-size: 1.8vh;
+      font-size: 1.6vh;
       padding: 0.2vh 0.8vw;
       border-radius: 30px;
       background: var(--badge-bg);
@@ -498,18 +498,18 @@
       display: inline-flex;
       align-items: center;
       gap: 0.2vw;
+      white-space: nowrap;
     }
     .summary-row .values .gap-badge.above { color: #10b981; border-color: #10b981; background: rgba(16,185,129,0.08); }
     .summary-row .values .gap-badge.below { color: #f59e0b; border-color: #f59e0b; background: rgba(245,158,11,0.08); }
     .summary-row .values .gap-badge.well-below { color: #ef4444; border-color: #ef4444; background: rgba(239,68,68,0.08); }
 
     .summary-row .bar-container {
-      flex: 0 0 20%;
+      flex: 0 0 18%;
       height: 0.8vh;
       background: var(--badge-bg);
       border-radius: 40px;
       overflow: hidden;
-      margin-left: 0.5vw;
     }
     .summary-row .bar-container .bar-fill {
       height: 100%;
@@ -527,7 +527,7 @@
       .metric-header .remote-inline { padding: 0.2vh 1.5vw; gap: 1vw; flex-wrap: wrap; }
       .metric-header .remote-inline .admin-link { border-left: none; padding-left: 0; margin-left: 0; }
       .summary-grid { grid-template-columns: 1fr; grid-template-rows: repeat(3, 1fr); gap: 1.5vh; }
-      .summary-row .values { flex-wrap: wrap; gap: 0.8vw; }
+      .summary-row .values { gap: 0.5vw; }
       .summary-row .bar-container { display: none; }
     }
 
@@ -553,7 +553,7 @@
     let isPaused = false;
     let allData = null;
 
-    // Helpers
+    // ----- Helpers -----
     function getStatusClass(value, target, isHigher) {
       if (isHigher) {
         if (value >= target) return 'on-target';
@@ -570,11 +570,11 @@
       const diff = isHigher ? value - target : target - value;
       const gap = Math.abs(diff);
       if (isHigher) {
-        if (diff >= 0) return `+${gap.toFixed(1)} above`;
-        return `${gap.toFixed(1)} below`;
+        if (diff >= 0) return `+${gap.toFixed(1)}`;
+        return `${gap.toFixed(1)}`;
       } else {
-        if (diff >= 0) return `${gap.toFixed(1)} below`;
-        return `+${gap.toFixed(1)} above`;
+        if (diff >= 0) return `${gap.toFixed(1)}`;
+        return `+${gap.toFixed(1)}`;
       }
     }
 
@@ -599,9 +599,10 @@
       const sign = diff > 0 ? '+' : '';
       const direction = diff > 0 ? (isHigher ? 'improving' : 'declining') : (isHigher ? 'declining' : 'improving');
       const emoji = diff > 0 ? '📈' : '📉';
-      return `${emoji} ${direction} (${sign}${pctChange.toFixed(1)}% vs last month)`;
+      return `${emoji} ${direction} (${sign}${pctChange.toFixed(1)}%)`;
     }
 
+    // ----- Fetch data -----
     async function fetchData() {
       try {
         const res = await fetch('data.json?t=' + Date.now());
@@ -614,6 +615,7 @@
       }
     }
 
+    // ----- Build slides -----
     function buildSlides(data) {
       const container = document.getElementById('slidesContainer');
       container.innerHTML = '';
@@ -649,7 +651,7 @@
         `;
       }
 
-      // Metric slides (0,1,2)
+      // ----- Metric slides (0,1,2) -----
       for (let mi = 0; mi < 3; mi++) {
         const metricKey = metricKeys[mi];
         const slide = document.createElement('div');
@@ -740,7 +742,7 @@
         container.appendChild(slide);
       }
 
-      // Summary slide (index 3) – no crowns
+      // ----- SUMMARY SLIDE (index 3) – simplified render -----
       const summarySlide = document.createElement('div');
       summarySlide.className = 'slide';
       summarySlide.dataset.slideType = 'summary';
@@ -784,6 +786,7 @@
       container.appendChild(summarySlide);
     }
 
+    // ----- Chart init -----
     let chartInstances = {};
 
     function initCharts() {
@@ -877,6 +880,7 @@
       updateSummary();
     }
 
+    // ----- Update metric text -----
     function updateMetricText(item) {
       const displayVal = item.current + (item.unit === '%' ? '%' : '');
       if (item.valueEl) item.valueEl.textContent = displayVal;
@@ -905,7 +909,8 @@
       if (item.gapEl) {
         const gapText = getGapText(item.current, item.target, item.higherIsBetter);
         const gapClass = getGapClass(item.current, item.target, item.higherIsBetter);
-        item.gapEl.textContent = gapText;
+        const unit = item.unit === '%' ? '%' : 's';
+        item.gapEl.textContent = `${gapText}${unit}`;
         item.gapEl.className = `gap-label ${gapClass}`;
       }
 
@@ -932,6 +937,7 @@
       }
     }
 
+    // ----- Update summary (reliable render) -----
     function updateSummary() {
       const metricKeys = ['SIS', 'IFSR', 'CHT'];
       const centres = allData.centres;
@@ -949,7 +955,7 @@
         const tpData = tpCentre.metrics[metricKey];
         const wnsData = wnsCentre.metrics[metricKey];
 
-        function buildRow(centre, data) {
+        function buildRowHTML(centre, data) {
           const current = data.current;
           const prev = data.previous;
           const diff = current - prev;
@@ -960,7 +966,7 @@
 
           const gap = isHigher ? current - target : target - current;
           const gapAbs = Math.abs(gap);
-          const gapText = (gap >= 0 ? '✅' : '⚠️') + ' ' + gapAbs.toFixed(1) + (unit === '%' ? '%' : 's');
+          const gapText = (gap >= 0 ? '✅' : '⚠️') + ' ' + gapAbs.toFixed(1) + unit;
           const gapClass = getGapClass(current, target, isHigher);
 
           let barPercent = 0;
@@ -991,12 +997,13 @@
         }
 
         container.innerHTML = `
-          ${buildRow(tpCentre, tpData)}
-          ${buildRow(wnsCentre, wnsData)}
+          ${buildRowHTML(tpCentre, tpData)}
+          ${buildRowHTML(wnsCentre, wnsData)}
         `;
       });
     }
 
+    // ----- Refresh data -----
     async function refreshData() {
       const newData = await fetchData();
       if (!newData) return;
@@ -1065,7 +1072,7 @@
       updateSummary();
     }
 
-    // Navigation
+    // ----- Navigation -----
     function goToSlide(index) {
       const slides = document.querySelectorAll('.slide');
       if (index < 0) index = 0;
@@ -1103,7 +1110,7 @@
       else { clearInterval(intervalId); intervalId = null; isPaused = true; document.querySelectorAll('.pause-btn').forEach(btn => btn.textContent = '▶'); }
     }
 
-    // Events
+    // ----- Events -----
     document.addEventListener('click', (e) => {
       const target = e.target.closest('button');
       if (!target) return;
@@ -1139,7 +1146,7 @@
       if (e.key === 'a' || e.key === 'A') { e.preventDefault(); window.open('admin.html', '_blank'); }
     });
 
-    // Init
+    // ----- Init -----
     const initialData = await fetchData();
     if (!initialData) {
       document.body.innerHTML = `<div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#b91c1c;font-size:2.5rem;background:#f2f5f9;">⚠️ Could not load data.json</div>`;
