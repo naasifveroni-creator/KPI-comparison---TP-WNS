@@ -12,6 +12,7 @@
       padding: 2rem;
       max-width: 1100px;
       margin: 0 auto;
+      position: relative;
     }
     h1 { font-size: 2.2rem; margin-bottom: 0.2rem; color: #0f172a; }
     .sub { color: #475569; margin-bottom: 2rem; }
@@ -88,44 +89,142 @@
       .centre-grid { grid-template-columns: 1fr; }
       .metric-row { grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; }
     }
+
+    /* Login overlay */
+    #loginOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    #loginOverlay .login-box {
+      background: white;
+      padding: 2.5rem 3rem;
+      border-radius: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    #loginOverlay .login-box h2 {
+      font-size: 1.8rem;
+      color: #0f172a;
+      margin-bottom: 0.5rem;
+    }
+    #loginOverlay .login-box p {
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+    #loginOverlay .login-box input {
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1.2rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      text-align: center;
+      letter-spacing: 4px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      transition: 0.2s;
+    }
+    #loginOverlay .login-box input:focus {
+      border-color: #3b82f6;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+    #loginOverlay .login-box .login-error {
+      color: #ef4444;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      height: 1.5rem;
+    }
+    #loginOverlay .login-box .btn-login {
+      background: #1e293b;
+      color: white;
+      border: none;
+      padding: 0.8rem 2.5rem;
+      border-radius: 40px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 100%;
+    }
+    #loginOverlay .login-box .btn-login:hover {
+      background: #0f172a;
+      transform: scale(1.02);
+    }
+    #adminContent {
+      display: none;
+    }
+    #adminContent.visible {
+      display: block;
+    }
   </style>
 </head>
 <body>
 
-<h1>📊 Admin Panel</h1>
-<p class="sub">TP vs WNS – Update data &amp; publish to <code>data.json</code></p>
-
-<div class="card">
-  <h2>🎯 Global Targets</h2>
-  <div class="grid-3" id="targetsContainer">
-    <!-- populated by JS -->
+<!-- Login Overlay -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <h2>🔐 Admin Access</h2>
+    <p>Enter the security PIN to continue</p>
+    <input type="password" id="pinInput" maxlength="10" placeholder="••••" autofocus />
+    <div class="login-error" id="loginError"></div>
+    <button class="btn-login" id="loginBtn">Unlock</button>
   </div>
 </div>
 
-<div class="card">
-  <h2>🏢 Centre Data (Current &amp; Previous)</h2>
-  <div class="centre-grid" id="centresContainer">
-    <!-- populated by JS -->
-  </div>
-</div>
+<!-- Main Admin Content (hidden until login) -->
+<div id="adminContent">
+  <h1>📊 Admin Panel</h1>
+  <p class="sub">TP vs WNS – Update data &amp; publish to <code>data.json</code></p>
 
-<div class="card">
-  <div class="actions">
-    <button class="btn btn-primary" id="loadBtn">📥 Load from data.json</button>
-    <button class="btn btn-success" id="publishBtn">🚀 Publish to GitHub</button>
-    <span id="status">Ready</span>
+  <div class="card">
+    <h2>🎯 Global Targets</h2>
+    <div class="grid-3" id="targetsContainer">
+      <!-- populated by JS -->
+    </div>
   </div>
-  <div class="token-hint">
-    🔑 <strong>GitHub Token required</strong> – store it in the <code>GITHUB_TOKEN</code> variable below (or use prompt). 
-    Needs <code>repo</code> scope. <br />
-    <small>If not set, you'll be prompted each time.</small>
+
+  <div class="card">
+    <h2>🏢 Centre Data (Current &amp; Previous)</h2>
+    <div class="centre-grid" id="centresContainer">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="actions">
+      <button class="btn btn-primary" id="loadBtn">📥 Load from data.json</button>
+      <button class="btn btn-success" id="publishBtn">🚀 Publish to GitHub</button>
+      <span id="status">Ready</span>
+    </div>
+    <div class="token-hint">
+      🔑 <strong>GitHub Token required</strong> – store it in the <code>GITHUB_TOKEN</code> variable below (or use prompt). 
+      Needs <code>repo</code> scope. <br />
+      <small>If not set, you'll be prompted each time.</small>
+    </div>
   </div>
 </div>
 
 <script>
+  // ===== SECURITY PIN =====
+  // Change this to your desired PIN
+  const ADMIN_PIN = '1234';
+
   // ===== CONFIG =====
   // Set your GitHub token here OR leave blank to be prompted.
-  // Get one at https://github.com/settings/tokens (repo scope)
   const GITHUB_TOKEN = ''; // <-- paste your token here if you want to skip prompts
 
   const REPO_OWNER = 'YOUR_USERNAME';      // <-- change to your GitHub username
@@ -133,10 +232,50 @@
   const FILE_PATH   = 'data.json';
   const BRANCH      = 'main';
 
-  // ===== STATE =====
-  let currentData = null;
+  // ===== LOGIN LOGIC =====
+  function checkLogin() {
+    // Check sessionStorage
+    if (sessionStorage.getItem('admin_logged_in') === 'true') {
+      showAdmin();
+      return true;
+    }
+    return false;
+  }
 
-  // ===== DOM REFS =====
+  function showAdmin() {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('adminContent').classList.add('visible');
+    // Load data automatically after login
+    loadData();
+  }
+
+  function attemptLogin() {
+    const input = document.getElementById('pinInput');
+    const error = document.getElementById('loginError');
+    if (input.value === ADMIN_PIN) {
+      sessionStorage.setItem('admin_logged_in', 'true');
+      error.textContent = '';
+      showAdmin();
+    } else {
+      error.textContent = '❌ Incorrect PIN. Try again.';
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  // Event listeners for login
+  document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+  document.getElementById('pinInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') attemptLogin();
+  });
+
+  // Check login on load
+  if (!checkLogin()) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+  }
+
+  // ===== ADMIN FUNCTIONALITY (same as before) =====
+  let currentData = null;
   const targetsContainer = document.getElementById('targetsContainer');
   const centresContainer = document.getElementById('centresContainer');
   const statusEl = document.getElementById('status');
@@ -146,11 +285,8 @@
     statusEl.style.color = isError ? '#dc2626' : '#0f172a';
   }
 
-  // ===== BUILD FORMS =====
   function buildForms(data) {
     currentData = data;
-
-    // Targets
     targetsContainer.innerHTML = '';
     const t = data.targets;
     const targetKeys = ['SIS', 'IFSR', 'CHT'];
@@ -164,7 +300,6 @@
       targetsContainer.appendChild(div);
     });
 
-    // Centres
     centresContainer.innerHTML = '';
     data.centres.forEach((centre, idx) => {
       const box = document.createElement('div');
@@ -184,12 +319,10 @@
         `;
         box.appendChild(row);
       });
-
       centresContainer.appendChild(box);
     });
   }
 
-  // ===== COLLECT FORM DATA =====
   function collectData() {
     const targets = {};
     ['SIS', 'IFSR', 'CHT'].forEach(key => {
@@ -200,8 +333,7 @@
     const centres = [];
     const centreNames = ['TP', 'WNS'];
     const metricKeys = ['SIS', 'IFSR', 'CHT'];
-    // we also need colours from the existing data if loaded, else use defaults
-    const defaultColours = { TP: '#1A73E8', WNS: '#F57C00' };
+    const defaultColours = { TP: '#3b82f6', WNS: '#f59e0b' };
 
     centreNames.forEach(name => {
       const metrics = {};
@@ -213,7 +345,6 @@
           previous: parseFloat(prev.value) || 0
         };
       });
-      // Preserve colour from currentData if available
       let colour = defaultColours[name];
       if (currentData) {
         const found = currentData.centres.find(c => c.name === name);
@@ -225,8 +356,8 @@
     return { targets, centres };
   }
 
-  // ===== LOAD FROM REMOTE data.json =====
   async function loadData() {
+    if (!document.getElementById('adminContent').classList.contains('visible')) return;
     setStatus('Loading...');
     try {
       const res = await fetch(FILE_PATH + '?t=' + Date.now());
@@ -239,12 +370,10 @@
     }
   }
 
-  // ===== PUBLISH VIA GITHUB API =====
   async function publishData() {
     const data = collectData();
     const jsonStr = JSON.stringify(data, null, 2);
 
-    // Get token
     let token = GITHUB_TOKEN;
     if (!token) {
       token = prompt('Enter your GitHub Personal Access Token (repo scope):');
@@ -257,7 +386,6 @@
     setStatus('Publishing...');
 
     try {
-      // 1. Get current file SHA
       const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
       let sha = null;
       try {
@@ -272,7 +400,6 @@
         }
       } catch(e) { /* file doesn't exist */ }
 
-      // 2. Commit
       const payload = {
         message: `Update data.json (${new Date().toISOString()})`,
         content: btoa(unescape(encodeURIComponent(jsonStr))),
@@ -296,7 +423,6 @@
       }
 
       setStatus('✅ Published successfully to GitHub!');
-      // Reload after a beat
       setTimeout(() => loadData(), 1500);
     } catch (e) {
       setStatus('❌ Publish failed: ' + e.message, true);
@@ -304,13 +430,12 @@
     }
   }
 
-  // ===== EVENT BINDING =====
   document.getElementById('loadBtn').addEventListener('click', loadData);
   document.getElementById('publishBtn').addEventListener('click', publishData);
 
-  // ===== INIT =====
-  // Try loading on start
-  loadData();
+  // If already logged in, load data (handled inside showAdmin)
+  // For safety, also call loadData when admin becomes visible
+  // Already called in showAdmin
 </script>
 </body>
 </html>
