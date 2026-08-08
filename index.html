@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TP vs WNS Leaderboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #f5f7fa;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Slides container */
+    .slides {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      pointer-events: none;
+      padding: 2vh 4vw;
+    }
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Metric title (top) */
+    .metric-title {
+      font-size: 4.5vh;
+      font-weight: 700;
+      color: #1e293b;
+      letter-spacing: 1px;
+      margin-bottom: 1.5vh;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 0.5vh 3vw;
+      border-radius: 60px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    /* Two columns */
+    .row {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      height: 75vh;
+      gap: 3vw;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .centre-col {
+      flex: 1;
+      max-width: 46vw;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      border-radius: 4vh;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+      padding: 2vh 1vw;
+      position: relative;
+    }
+
+    .centre-name {
+      font-size: 3.8vh;
+      font-weight: 700;
+      margin-bottom: 0.5vh;
+      letter-spacing: 1px;
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 70%;
+      max-height: 55vh;
+      aspect-ratio: 1/1;
+      margin: 1vh 0;
+    }
+
+    .chart-wrapper canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Center text overlay (value + trend) */
+    .centre-value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+    .centre-value .number {
+      font-size: 7vh;
+      font-weight: 800;
+      line-height: 1;
+      display: block;
+    }
+    .centre-value .trend {
+      font-size: 2.8vh;
+      font-weight: 600;
+      display: block;
+      margin-top: 0.2vh;
+    }
+    .trend.up { color: #10b981; }
+    .trend.down { color: #ef4444; }
+    .trend.flat { color: #94a3b8; }
+
+    .target-label {
+      font-size: 2.6vh;
+      font-weight: 500;
+      color: #475569;
+      margin-top: 0.8vh;
+      background: #f1f5f9;
+      padding: 0.4vh 2vw;
+      border-radius: 40px;
+    }
+    .target-label span {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* Remote control (small, bottom‑centre) */
+    .remote {
+      position: fixed;
+      bottom: 2.5vh;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1.2vw;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      padding: 0.8vh 2vw;
+      border-radius: 60px;
+      z-index: 999;
+      align-items: center;
+    }
+    .remote button {
+      background: none;
+      border: none;
+      color: #f1f5f9;
+      font-size: 2.8vh;
+      cursor: pointer;
+      padding: 0.2vh 0.8vw;
+      border-radius: 40px;
+      transition: 0.2s;
+      font-weight: 600;
+    }
+    .remote button:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .remote .dot {
+      color: #94a3b8;
+      font-size: 2.2vh;
+      margin: 0 0.2vw;
+      cursor: pointer;
+    }
+    .remote .dot.active-dot {
+      color: #ffffff;
+      font-size: 3vh;
+    }
+    .remote .pause-btn {
+      font-size: 2.2vh;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .row { flex-direction: column; height: auto; gap: 2vh; }
+      .centre-col { max-width: 90vw; height: 42vh; }
+      .chart-wrapper { width: 55%; max-height: 28vh; }
+      .centre-value .number { font-size: 5vh; }
+      .metric-title { font-size: 3.5vh; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="slides" id="slidesContainer"></div>
+
+<div class="remote" id="remoteControl">
+  <button id="prevBtn" title="Previous">◀</button>
+  <button id="pauseBtn" class="pause-btn" title="Pause/Play">⏸</button>
+  <button id="nextBtn" title="Next">▶</button>
+  <span style="color:#94a3b8;margin:0 0.6vw;">|</span>
+  <span id="dotsContainer" style="display:flex;gap:0.4vw;align-items:center;"></span>
+</div>
+
+<script>
+  (async function() {
+    // --- CONFIG ---
+    const SLIDE_INTERVAL = 15000; // 15 seconds
+    let currentSlide = 0;
+    let slidesData = [];
+    let intervalId = null;
+    let isPaused = false;
+
+    // --- FETCH DATA ---
+    let data;
+    try {
+      const res = await fetch('data.json');
+      data = await res.json();
+    } catch(e) {
+      document.body.innerHTML = '<h1 style="color:red;text-align:center;margin-top:20vh;">Error loading data.json</h1>';
+      return;
+    }
+
+    const targets = data.targets;
+    const centres = data.centres;
+
+    // Metric list (order of slides)
+    const metricKeys = ['SIS', 'IFSR', 'CHT'];
+    const metricLabels = {
+      SIS: 'SIS (%)',
+      IFSR: 'IFSR (%)',
+      CHT: 'CHT (sec)'
+    };
+    // Direction: true = higher is better, false = lower is better
+    const higherIsBetter = { SIS: true, IFSR: true, CHT: false };
+
+    // --- BUILD SLIDES ---
+    const container = document.getElementById('slidesContainer');
+    const dotsContainer = document.getElementById('dotsContainer');
+
+    metricKeys.forEach((metricKey, slideIndex) => {
+      const slide = document.createElement('div');
+      slide.className = 'slide' + (slideIndex === 0 ? ' active' : '');
+      slide.dataset.index = slideIndex;
+
+      // Metric title
+      const title = document.createElement('div');
+      title.className = 'metric-title';
+      title.textContent = metricLabels[metricKey] || metricKey;
+      slide.appendChild(title);
+
+      // Row for two centres
+      const row = document.createElement('div');
+      row.className = 'row';
+
+      centres.forEach((centre) => {
+        const col = document.createElement('div');
+        col.className = 'centre-col';
+
+        // Centre name
+        const name = document.createElement('div');
+        name.className = 'centre-name';
+        name.style.color = centre.colour;
+        name.textContent = centre.name;
+        col.appendChild(name);
+
+        // Chart wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'chart-wrapper';
+        const canvas = document.createElement('canvas');
+        canvas.id = `chart-${centre.name}-${metricKey}`;
+        wrapper.appendChild(canvas);
+
+        // Overlay for centre value + trend
+        const overlay = document.createElement('div');
+        overlay.className = 'centre-value';
+        overlay.id = `overlay-${centre.name}-${metricKey}`;
+        overlay.innerHTML = `
+          <span class="number">—</span>
+          <span class="trend"></span>
+        `;
+        wrapper.appendChild(overlay);
+
+        // Target label
+        const targetVal = targets[metricKey];
+        const targetLabel = document.createElement('div');
+        targetLabel.className = 'target-label';
+        targetLabel.innerHTML = `🎯 Target: <span>${metricKey === 'CHT' ? targetVal : targetVal + '%'}</span>`;
+        col.appendChild(targetLabel);
+
+        row.appendChild(col);
+
+        // Store refs for chart init
+        slidesData.push({
+          slideIndex,
+          centreName: centre.name,
+          colour: centre.colour,
+          metricKey,
+          canvas,
+          overlay,
+          target: targetVal,
+          current: centre.metrics[metricKey].current,
+          previous: centre.metrics[metricKey].previous,
+          higherIsBetter: higherIsBetter[metricKey]
+        });
+      });
+
+      slide.appendChild(row);
+      container.appendChild(slide);
+
+      // Dot
+      const dot = document.createElement('span');
+      dot.className = 'dot' + (slideIndex === 0 ? ' active-dot' : '');
+      dot.textContent = '●';
+      dot.dataset.index = slideIndex;
+      dot.style.cursor = 'pointer';
+      dot.addEventListener('click', () => goToSlide(slideIndex));
+      dotsContainer.appendChild(dot);
+    });
+
+    // --- INIT CHARTS ---
+    const charts = [];
+
+    slidesData.forEach((item) => {
+      const ctx = item.canvas.getContext('2d');
+      const current = item.current;
+      const target = item.target;
+      const isHigher = item.higherIsBetter;
+
+      // Determine if metric is met
+      let met;
+      if (isHigher) {
+        met = current >= target;
+      } else {
+        met = current <= target;
+      }
+
+      // Arc value: how much of the doughnut is filled (capped at 100%)
+      let fillPercent;
+      if (isHigher) {
+        fillPercent = Math.min((current / target) * 100, 100);
+      } else {
+        // For CHT: lower is better, we invert: if current <= target => 100%, else percentage of target/current
+        if (current <= target) {
+          fillPercent = 100;
+        } else {
+          // e.g. target 580, current 829 => 580/829 = ~70%
+          fillPercent = Math.min((target / current) * 100, 100);
+        }
+      }
+
+      const colour = met ? '#10b981' : '#f59e0b'; // green / amber
+
+      const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [fillPercent, 100 - fillPercent],
+            backgroundColor: [colour, '#e9edf2'],
+            borderWidth: 0,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          cutout: '72%',
+          plugins: {
+            tooltip: { enabled: false },
+            legend: { display: false }
+          },
+          animation: {
+            animateRotate: true,
+            duration: 800
+          }
+        },
+        plugins: [{
+          id: 'doughnutCenterText',
+          // we use our own overlay, so no need to draw text here
+        }]
+      });
+
+      charts.push(chart);
+      item.chart = chart;
+      item.chartInstance = chart;
+
+      // Update overlay with value and trend
+      const overlay = item.overlay;
+      const numEl = overlay.querySelector('.number');
+      const trendEl = overlay.querySelector('.trend');
+
+      let displayValue;
+      if (item.metricKey === 'CHT') {
+        displayValue = current;
+      } else {
+        displayValue = current + '%';
+      }
+      numEl.textContent = displayValue;
+
+      // Trend
+      const prev = item.previous;
+      const diff = current - prev;
+      let trendText = '';
+      let trendClass = 'flat';
+      if (Math.abs(diff) < 0.01) {
+        trendText = '→ 0%';
+        trendClass = 'flat';
+      } else {
+        const pctChange = (diff / Math.abs(prev)) * 100;
+        const sign = diff > 0 ? '+' : '';
+        trendText = `${sign}${pctChange.toFixed(1)}%`;
+        // For higher-is-better: up is good, down is bad. For CHT: reversed.
+        if (isHigher) {
+          trendClass = diff > 0 ? 'up' : 'down';
+        } else {
+          trendClass = diff < 0 ? 'up' : 'down';
+        }
+      }
+      trendEl.textContent = trendText;
+      trendEl.className = `trend ${trendClass}`;
+    });
+
+    // --- SLIDE NAVIGATION ---
+    function goToSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= metricKeys.length) index = metricKeys.length - 1;
+      currentSlide = index;
+
+      // Update slides
+      const slides = document.querySelectorAll('.slide');
+      slides.forEach((s, i) => {
+        s.classList.toggle('active', i === index);
+      });
+
+      // Update dots
+      const dots = dotsContainer.querySelectorAll('.dot');
+      dots.forEach((d, i) => {
+        d.classList.toggle('active-dot', i === index);
+      });
+    }
+
+    function nextSlide() {
+      const next = (currentSlide + 1) % metricKeys.length;
+      goToSlide(next);
+    }
+
+    function prevSlide() {
+      const prev = (currentSlide - 1 + metricKeys.length) % metricKeys.length;
+      goToSlide(prev);
+    }
+
+    // --- AUTO PLAY ---
+    function startAutoPlay() {
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(nextSlide, SLIDE_INTERVAL);
+      isPaused = false;
+      document.getElementById('pauseBtn').textContent = '⏸';
+    }
+
+    function togglePause() {
+      if (isPaused) {
+        startAutoPlay();
+      } else {
+        clearInterval(intervalId);
+        intervalId = null;
+        isPaused = true;
+        document.getElementById('pauseBtn').textContent = '▶';
+      }
+    }
+
+    // --- REMOTE CONTROLS ---
+    document.getElementById('nextBtn').addEventListener('click', () => { clearInterval(intervalId); nextSlide(); startAutoPlay(); });
+    document.getElementById('prevBtn').addEventListener('click', () => { clearInterval(intervalId); prevSlide(); startAutoPlay(); });
+    document.getElementById('pauseBtn').addEventListener('click', togglePause);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); clearInterval(intervalId); nextSlide(); startAutoPlay(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); clearInterval(intervalId); prevSlide(); startAutoPlay(); }
+      if (e.key === 'p' || e.key === 'P') { e.preventDefault(); togglePause(); }
+    });
+
+    // --- START ---
+    goToSlide(0);
+    startAutoPlay();
+
+    // Resize charts on window resize (they auto-resize, but we force a redraw)
+    window.addEventListener('resize', () => {
+      charts.forEach(ch => ch.resize());
+    });
+
+    // Update the centre numbers to be huge via CSS (already styled)
+  })();
+</script>
+</body>
+</html>
