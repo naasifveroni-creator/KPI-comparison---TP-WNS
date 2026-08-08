@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – TP vs WNS</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #f1f5f9;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 2.2rem; margin-bottom: 0.2rem; color: #0f172a; }
+    .sub { color: #475569; margin-bottom: 2rem; }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 1.8rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    }
+    .card h2 { font-size: 1.5rem; margin-bottom: 1.2rem; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.6rem; }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .field-group { display: flex; flex-direction: column; gap: 0.3rem; }
+    .field-group label { font-weight: 600; font-size: 0.9rem; color: #334155; }
+    .field-group input {
+      padding: 0.6rem 0.8rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 1rem;
+      width: 100%;
+      transition: 0.2s;
+    }
+    .field-group input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    .centre-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    .centre-box {
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 1.2rem 1.5rem;
+      border-left: 6px solid #3b82f6;
+    }
+    .centre-box.wns { border-left-color: #f59e0b; }
+    .centre-box h3 { font-size: 1.3rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .metric-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+      background: white;
+      padding: 0.6rem 0.8rem;
+      border-radius: 10px;
+      align-items: center;
+    }
+    .metric-row .mname { font-weight: 600; color: #0f172a; font-size: 0.95rem; }
+    .metric-row input { width: 100%; padding: 0.4rem 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; }
+    .actions { margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .btn {
+      padding: 0.8rem 2.2rem;
+      border: none;
+      border-radius: 40px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-primary { background: #1e293b; color: white; }
+    .btn-primary:hover { background: #0f172a; transform: scale(1.02); }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; transform: scale(1.02); }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    #status { padding: 0.8rem 1.2rem; border-radius: 12px; background: #f1f5f9; color: #0f172a; font-weight: 500; min-width: 200px; text-align: center; }
+    .token-hint { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; background: #f1f5f9; padding: 0.6rem 1rem; border-radius: 10px; }
+    .token-hint code { background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; }
+    @media (max-width: 700px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .centre-grid { grid-template-columns: 1fr; }
+      .metric-row { grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>📊 Admin Panel</h1>
+<p class="sub">TP vs WNS – Update data &amp; publish to <code>data.json</code></p>
+
+<div class="card">
+  <h2>🎯 Global Targets</h2>
+  <div class="grid-3" id="targetsContainer">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<div class="card">
+  <h2>🏢 Centre Data (Current &amp; Previous)</h2>
+  <div class="centre-grid" id="centresContainer">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<div class="card">
+  <div class="actions">
+    <button class="btn btn-primary" id="loadBtn">📥 Load from data.json</button>
+    <button class="btn btn-success" id="publishBtn">🚀 Publish to GitHub</button>
+    <span id="status">Ready</span>
+  </div>
+  <div class="token-hint">
+    🔑 <strong>GitHub Token required</strong> – store it in the <code>GITHUB_TOKEN</code> variable below (or use prompt). 
+    Needs <code>repo</code> scope. <br />
+    <small>If not set, you'll be prompted each time.</small>
+  </div>
+</div>
+
+<script>
+  // ===== CONFIG =====
+  // Set your GitHub token here OR leave blank to be prompted.
+  // Get one at https://github.com/settings/tokens (repo scope)
+  const GITHUB_TOKEN = ''; // <-- paste your token here if you want to skip prompts
+
+  const REPO_OWNER = 'YOUR_USERNAME';      // <-- change to your GitHub username
+  const REPO_NAME   = 'YOUR_REPO_NAME';     // <-- change to your repo name
+  const FILE_PATH   = 'data.json';
+  const BRANCH      = 'main';
+
+  // ===== STATE =====
+  let currentData = null;
+
+  // ===== DOM REFS =====
+  const targetsContainer = document.getElementById('targetsContainer');
+  const centresContainer = document.getElementById('centresContainer');
+  const statusEl = document.getElementById('status');
+
+  function setStatus(msg, isError = false) {
+    statusEl.textContent = msg;
+    statusEl.style.color = isError ? '#dc2626' : '#0f172a';
+  }
+
+  // ===== BUILD FORMS =====
+  function buildForms(data) {
+    currentData = data;
+
+    // Targets
+    targetsContainer.innerHTML = '';
+    const t = data.targets;
+    const targetKeys = ['SIS', 'IFSR', 'CHT'];
+    targetKeys.forEach(key => {
+      const div = document.createElement('div');
+      div.className = 'field-group';
+      div.innerHTML = `
+        <label for="target-${key}">${key} Target</label>
+        <input type="number" step="0.01" id="target-${key}" value="${t[key]}" />
+      `;
+      targetsContainer.appendChild(div);
+    });
+
+    // Centres
+    centresContainer.innerHTML = '';
+    data.centres.forEach((centre, idx) => {
+      const box = document.createElement('div');
+      box.className = `centre-box ${centre.name.toLowerCase() === 'wns' ? 'wns' : ''}`;
+      const colourDot = `<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${centre.colour};margin-right:6px;"></span>`;
+      box.innerHTML = `<h3>${colourDot} ${centre.name}</h3>`;
+
+      const metrics = ['SIS', 'IFSR', 'CHT'];
+      metrics.forEach(metric => {
+        const row = document.createElement('div');
+        row.className = 'metric-row';
+        const val = centre.metrics[metric];
+        row.innerHTML = `
+          <span class="mname">${metric}</span>
+          <input type="number" step="0.01" id="${centre.name}-${metric}-current" value="${val.current}" placeholder="Current" />
+          <input type="number" step="0.01" id="${centre.name}-${metric}-previous" value="${val.previous}" placeholder="Previous" />
+        `;
+        box.appendChild(row);
+      });
+
+      centresContainer.appendChild(box);
+    });
+  }
+
+  // ===== COLLECT FORM DATA =====
+  function collectData() {
+    const targets = {};
+    ['SIS', 'IFSR', 'CHT'].forEach(key => {
+      const el = document.getElementById(`target-${key}`);
+      targets[key] = parseFloat(el.value) || 0;
+    });
+
+    const centres = [];
+    const centreNames = ['TP', 'WNS'];
+    const metricKeys = ['SIS', 'IFSR', 'CHT'];
+    // we also need colours from the existing data if loaded, else use defaults
+    const defaultColours = { TP: '#1A73E8', WNS: '#F57C00' };
+
+    centreNames.forEach(name => {
+      const metrics = {};
+      metricKeys.forEach(metric => {
+        const cur = document.getElementById(`${name}-${metric}-current`);
+        const prev = document.getElementById(`${name}-${metric}-previous`);
+        metrics[metric] = {
+          current: parseFloat(cur.value) || 0,
+          previous: parseFloat(prev.value) || 0
+        };
+      });
+      // Preserve colour from currentData if available
+      let colour = defaultColours[name];
+      if (currentData) {
+        const found = currentData.centres.find(c => c.name === name);
+        if (found) colour = found.colour;
+      }
+      centres.push({ name, colour, metrics });
+    });
+
+    return { targets, centres };
+  }
+
+  // ===== LOAD FROM REMOTE data.json =====
+  async function loadData() {
+    setStatus('Loading...');
+    try {
+      const res = await fetch(FILE_PATH + '?t=' + Date.now());
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      buildForms(data);
+      setStatus('✅ Loaded from ' + FILE_PATH);
+    } catch (e) {
+      setStatus('❌ Failed to load: ' + e.message, true);
+    }
+  }
+
+  // ===== PUBLISH VIA GITHUB API =====
+  async function publishData() {
+    const data = collectData();
+    const jsonStr = JSON.stringify(data, null, 2);
+
+    // Get token
+    let token = GITHUB_TOKEN;
+    if (!token) {
+      token = prompt('Enter your GitHub Personal Access Token (repo scope):');
+      if (!token) {
+        setStatus('❌ Token required to publish', true);
+        return;
+      }
+    }
+
+    setStatus('Publishing...');
+
+    try {
+      // 1. Get current file SHA
+      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+      let sha = null;
+      try {
+        const getRes = await fetch(url, {
+          headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (getRes.ok) {
+          const fileInfo = await getRes.json();
+          sha = fileInfo.sha;
+        } else if (getRes.status !== 404) {
+          throw new Error(`GitHub GET error: ${getRes.status}`);
+        }
+      } catch(e) { /* file doesn't exist */ }
+
+      // 2. Commit
+      const payload = {
+        message: `Update data.json (${new Date().toISOString()})`,
+        content: btoa(unescape(encodeURIComponent(jsonStr))),
+        branch: BRANCH
+      };
+      if (sha) payload.sha = sha;
+
+      const putRes = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!putRes.ok) {
+        const err = await putRes.json();
+        throw new Error(`GitHub PUT ${putRes.status}: ${err.message || 'Unknown'}`);
+      }
+
+      setStatus('✅ Published successfully to GitHub!');
+      // Reload after a beat
+      setTimeout(() => loadData(), 1500);
+    } catch (e) {
+      setStatus('❌ Publish failed: ' + e.message, true);
+      console.error(e);
+    }
+  }
+
+  // ===== EVENT BINDING =====
+  document.getElementById('loadBtn').addEventListener('click', loadData);
+  document.getElementById('publishBtn').addEventListener('click', publishData);
+
+  // ===== INIT =====
+  // Try loading on start
+  loadData();
+</script>
+</body>
+</html>
