@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
   <style>
+    /* (All styles exactly as before – unchanged) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
@@ -206,6 +207,13 @@
       color: #3b82f6;
       background: var(--badge-bg);
     }
+    /* NEW: Fullscreen button */
+    .metric-header .remote-inline .fullscreen-btn {
+      font-size: 1.8vh;
+      border-left: 1px solid var(--badge-border);
+      padding-left: 0.6vw;
+      margin-left: 0.2vw;
+    }
 
     .card-row {
       flex: 1;
@@ -384,7 +392,7 @@
       font-weight: 600;
     }
 
-    /* ===== SUMMARY SLIDE – VERTICAL STACK (clean & reliable) ===== */
+    /* Summary vertical (unchanged) */
     .summary-grid-vertical {
       flex: 1;
       display: flex;
@@ -553,7 +561,7 @@
     let isPaused = false;
     let allData = null;
 
-    // ----- Helpers -----
+    // ----- Helpers (unchanged) -----
     function getStatusClass(value, target, isHigher) {
       if (isHigher) {
         if (value >= target) return 'on-target';
@@ -615,7 +623,7 @@
       }
     }
 
-    // ----- Build slides -----
+    // ----- Build slides (modified remote to include fullscreen button) -----
     function buildSlides(data) {
       const container = document.getElementById('slidesContainer');
       container.innerHTML = '';
@@ -646,6 +654,7 @@
             <button class="next-btn" title="Next">›</button>
             <span class="slide-counter">${slideIndex+1} / ${totalSlides}</span>
             ${dotsHTML}
+            <button class="fullscreen-btn" title="Toggle Fullscreen (F)">⛶</button>
             <button class="admin-link" title="Open Admin (keyboard: A)">⚙ Admin</button>
           </div>
         `;
@@ -742,7 +751,7 @@
         container.appendChild(slide);
       }
 
-      // ----- SUMMARY SLIDE (index 3) – VERTICAL STACK -----
+      // ----- SUMMARY SLIDE (index 3) -----
       const summarySlide = document.createElement('div');
       summarySlide.className = 'slide';
       summarySlide.dataset.slideType = 'summary';
@@ -786,7 +795,7 @@
       container.appendChild(summarySlide);
     }
 
-    // ----- Chart init -----
+    // ----- Chart init (unchanged) -----
     let chartInstances = {};
 
     function initCharts() {
@@ -880,7 +889,7 @@
       updateSummary();
     }
 
-    // ----- Update metric text -----
+    // ----- Update functions (unchanged) -----
     function updateMetricText(item) {
       const displayVal = item.current + (item.unit === '%' ? '%' : '');
       if (item.valueEl) item.valueEl.textContent = displayVal;
@@ -937,7 +946,6 @@
       }
     }
 
-    // ----- Update summary (vertical stack) -----
     function updateSummary() {
       const metricKeys = ['SIS', 'IFSR', 'CHT'];
       const centres = allData.centres;
@@ -1110,6 +1118,19 @@
       else { clearInterval(intervalId); intervalId = null; isPaused = true; document.querySelectorAll('.pause-btn').forEach(btn => btn.textContent = '▶'); }
     }
 
+    // ----- Fullscreen function -----
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.warn('Fullscreen request denied:', err);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
     // ----- Events -----
     document.addEventListener('click', (e) => {
       const target = e.target.closest('button');
@@ -1131,6 +1152,9 @@
       if (target.classList.contains('admin-link')) {
         window.open('admin.html', '_blank');
       }
+      if (target.classList.contains('fullscreen-btn')) {
+        toggleFullscreen();
+      }
       const dot = target.closest('.dot');
       if (dot && dot.dataset.index !== undefined) {
         clearInterval(intervalId);
@@ -1144,6 +1168,7 @@
       if (e.key === 'ArrowLeft') { e.preventDefault(); clearInterval(intervalId); prevSlide(); startAutoPlay(); }
       if (e.key === 'p' || e.key === 'P') { e.preventDefault(); togglePause(); }
       if (e.key === 'a' || e.key === 'A') { e.preventDefault(); window.open('admin.html', '_blank'); }
+      if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
     });
 
     // ----- Init -----
