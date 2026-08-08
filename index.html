@@ -11,7 +11,6 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* Light theme only – permanent */
     :root {
       --bg: #f2f5f9;
       --card-bg: rgba(255,255,255,0.85);
@@ -334,6 +333,31 @@
     .details-area .comparison-row .gap-label.below { color: #f59e0b; }
     .details-area .comparison-row .gap-label.well-below { color: #ef4444; }
 
+    /* NEW: Insight label – replaces "higher is better" */
+    .details-area .insight-row {
+      display: flex;
+      align-items: center;
+      gap: 1vw;
+      margin-top: 0.2vh;
+      font-size: 2vh;
+      font-weight: 500;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+    .details-area .insight-row .insight-badge {
+      background: var(--badge-bg);
+      padding: 0.2vh 0.8vw;
+      border-radius: 30px;
+      border: 1px solid var(--badge-border);
+      font-size: 1.8vh;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3vw;
+    }
+    .details-area .insight-row .insight-badge.improving { color: #10b981; border-color: #10b981; background: rgba(16,185,129,0.08); }
+    .details-area .insight-row .insight-badge.declining { color: #ef4444; border-color: #ef4444; background: rgba(239,68,68,0.08); }
+    .details-area .insight-row .insight-badge.steady { color: var(--text-muted); border-color: var(--badge-border); }
+
     .sparkline-container {
       width: 100%;
       height: 4vh;
@@ -456,7 +480,6 @@
       .summary-grid { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
     }
 
-    /* Print styles */
     @media print {
       body { background: white !important; }
       .slide { opacity: 1 !important; position: relative !important; display: block !important; }
@@ -479,7 +502,6 @@
     let isPaused = false;
     let allData = null;
 
-    // --- Helper functions ---
     function getStatusClass(value, target, isHigher) {
       if (isHigher) {
         if (value >= target) return 'on-target';
@@ -516,7 +538,20 @@
       }
     }
 
-    // --- Fetch data ---
+    // NEW: Generate insight text based on current vs previous
+    function getInsightText(current, previous, isHigher, unit) {
+      const diff = current - previous;
+      const absDiff = Math.abs(diff);
+      if (Math.abs(diff) < 0.01) {
+        return `→ Steady at ${current}${unit}`;
+      }
+      const pctChange = (diff / Math.abs(previous)) * 100;
+      const sign = diff > 0 ? '+' : '';
+      const direction = diff > 0 ? (isHigher ? 'improving' : 'declining') : (isHigher ? 'declining' : 'improving');
+      const emoji = diff > 0 ? '📈' : '📉';
+      return `${emoji} ${direction} (${sign}${pctChange.toFixed(1)}% vs last month)`;
+    }
+
     async function fetchData() {
       try {
         const res = await fetch('data.json?t=' + Date.now());
@@ -529,7 +564,6 @@
       }
     }
 
-    // --- Build slides ---
     function buildSlides(data) {
       const container = document.getElementById('slidesContainer');
       container.innerHTML = '';
@@ -566,7 +600,6 @@
         `;
       }
 
-      // Build each metric slide (first 3)
       for (let mi = 0; mi < 3; mi++) {
         const metricKey = metricKeys[mi];
         const slide = document.createElement('div');
@@ -613,6 +646,10 @@
               <span class="prev-label" id="prev-${centre.name}-${metricKey}">Prev: —</span>
               <span class="gap-label" id="gap-${centre.name}-${metricKey}">Gap: —</span>
             </div>
+            <!-- NEW: Insight row replaces "higher is better" -->
+            <div class="insight-row">
+              <span class="insight-badge" id="insight-${centre.name}-${metricKey}">—</span>
+            </div>
             <div class="sparkline-container">
               <canvas id="spark-${centre.name}-${metricKey}"></canvas>
             </div>
@@ -621,7 +658,6 @@
                 <svg class="t-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                 Target: <strong>${targets[metricKey]}${metricUnits[metricKey]}</strong>
               </span>
-              <span style="font-size:1.8vh;color:var(--text-muted);">${metricKey === 'CHT' ? '↓ lower is better' : '↑ higher is better'}</span>
             </div>
           `;
 
@@ -645,6 +681,7 @@
             trendEl: document.getElementById(`trend-${centre.name}-${metricKey}`),
             prevEl: document.getElementById(`prev-${centre.name}-${metricKey}`),
             gapEl: document.getElementById(`gap-${centre.name}-${metricKey}`),
+            insightEl: document.getElementById(`insight-${centre.name}-${metricKey}`),
             sparkCanvas: document.getElementById(`spark-${centre.name}-${metricKey}`),
             statusBadge: document.getElementById(`status-${metricKey}`)
           });
@@ -654,7 +691,7 @@
         container.appendChild(slide);
       }
 
-      // --- Summary slide (index 3) ---
+      // Summary slide
       const summarySlide = document.createElement('div');
       summarySlide.className = 'slide';
       summarySlide.dataset.slideType = 'summary';
@@ -696,7 +733,6 @@
       container.appendChild(summarySlide);
     }
 
-    // --- Chart initialisation and update ---
     let chartInstances = {};
 
     function initCharts() {
@@ -764,7 +800,6 @@
         });
         chartInstances[`${item.centreName}-${item.metricKey}`] = chart;
 
-        // Sparkline
         if (item.sparkCanvas && item.history && item.history.length > 1) {
           const sparkCtx = item.sparkCanvas.getContext('2d');
           new Chart(sparkCtx, {
@@ -829,6 +864,20 @@
         item.gapEl.className = `gap-label ${gapClass}`;
       }
 
+      // NEW: Update insight label
+      if (item.insightEl) {
+        const insightText = getInsightText(item.current, item.previous, item.higherIsBetter, item.unit);
+        item.insightEl.textContent = insightText;
+        // Determine class based on direction
+        const diff = item.current - item.previous;
+        if (Math.abs(diff) < 0.01) {
+          item.insightEl.className = 'insight-badge steady';
+        } else {
+          const isImproving = (diff > 0 && item.higherIsBetter) || (diff < 0 && !item.higherIsBetter);
+          item.insightEl.className = `insight-badge ${isImproving ? 'improving' : 'declining'}`;
+        }
+      }
+
       if (item.statusBadge) {
         const status = getStatusClass(item.current, item.target, item.higherIsBetter);
         let label = '';
@@ -887,7 +936,6 @@
       });
     }
 
-    // --- Refresh data and update everything ---
     async function refreshData() {
       const newData = await fetchData();
       if (!newData) return;
@@ -956,7 +1004,6 @@
       updateSummary();
     }
 
-    // --- Navigation ---
     function goToSlide(index) {
       const slides = document.querySelectorAll('.slide');
       if (index < 0) index = 0;
@@ -998,7 +1045,6 @@
       window.print();
     }
 
-    // --- Event listeners ---
     document.addEventListener('click', (e) => {
       const target = e.target.closest('button');
       if (!target) return;
@@ -1038,7 +1084,6 @@
       if (e.key === 'PrintScreen') { printSlide(); }
     });
 
-    // --- Initialise ---
     const initialData = await fetchData();
     if (!initialData) {
       document.body.innerHTML = `<div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#b91c1c;font-size:2.5rem;background:#f2f5f9;">⚠️ Could not load data.json</div>`;
