@@ -31,12 +31,12 @@
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
-      height: 100dvh; /* dynamic viewport height */
+      height: 100dvh;
       width: 100vw;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding-top: 10dvh; /* matches brand bar height in dvh */
+      padding-top: 16dvh; /* matches brand bar height */
     }
     body::before {
       content: '';
@@ -61,13 +61,13 @@
       z-index: 0;
     }
 
-    /* Brand Bar – uses dvh for consistency */
+    /* Brand Bar – 16dvh tall, logo fills it */
     .brand-bar {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      height: 10dvh;
+      height: 16dvh;
       background: rgba(255,255,255,0.85);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--badge-border);
@@ -577,8 +577,8 @@
     #lastUpdatedFooter:hover { opacity: 1; }
 
     @media (max-width: 768px) {
-      body { padding-top: 8dvh; }
-      .brand-bar { height: 8dvh; padding: 0 1.5vw; }
+      body { padding-top: 12dvh; } /* slightly smaller on mobile */
+      .brand-bar { height: 12dvh; padding: 0 1.5vw; }
       .brand-bar .brand-left img { height: 80%; }
       .slide { padding: 1vh 2vw; }
       .centre-card { flex-direction: column; padding: 1.5vh; }
@@ -618,7 +618,7 @@
 <div id="lastUpdatedFooter">🕒 Loading...</div>
 
 <script>
-  // (JavaScript remains exactly the same as the last version)
+  // (JavaScript is identical to the previous working version – no changes needed)
   (async function() {
     const SLIDE_INTERVAL = 15000;
     let currentSlide = 0;
@@ -627,7 +627,6 @@
     let isPaused = false;
     let allData = null;
 
-    // ----- Helpers -----
     function getStatusClass(value, target, isHigher) {
       if (isHigher) {
         if (value >= target) return 'on-target';
@@ -676,7 +675,6 @@
       return `${emoji} ${direction} (${sign}${pctChange.toFixed(1)}%)`;
     }
 
-    // ----- Timestamp update (footer) -----
     function updateTimestamp(data) {
       const el = document.getElementById('lastUpdatedFooter');
       if (!el) return;
@@ -696,7 +694,6 @@
       }
     }
 
-    // ----- Fetch data -----
     async function fetchData() {
       try {
         const res = await fetch('data.json?t=' + Date.now());
@@ -709,7 +706,6 @@
       }
     }
 
-    // ----- Build slides -----
     function buildSlides(data) {
       const container = document.getElementById('slidesContainer');
       container.innerHTML = '';
@@ -746,7 +742,6 @@
         `;
       }
 
-      // ----- Metric slides -----
       for (let mi = 0; mi < 3; mi++) {
         const metricKey = metricKeys[mi];
         const slide = document.createElement('div');
@@ -780,7 +775,6 @@
           const details = document.createElement('div');
           details.className = 'details-area';
           const dotColour = centre.colour;
-          // LOGO PATHS
           let logoPath;
           if (centre.name === 'TP') {
             logoPath = 'assets/TP-logo.png';
@@ -846,7 +840,7 @@
         container.appendChild(slide);
       }
 
-      // ----- Summary slide -----
+      // Summary slide
       const summarySlide = document.createElement('div');
       summarySlide.className = 'slide';
       summarySlide.dataset.slideType = 'summary';
@@ -892,7 +886,6 @@
       updateTimestamp(data);
     }
 
-    // ----- Chart init -----
     let chartInstances = {};
 
     function initCharts() {
@@ -986,7 +979,6 @@
       updateSummary();
     }
 
-    // ----- Update metric text -----
     function updateMetricText(item) {
       const displayVal = item.current + (item.unit === '%' ? '%' : '');
       if (item.valueEl) item.valueEl.textContent = displayVal;
@@ -1043,7 +1035,6 @@
       }
     }
 
-    // ----- Update summary -----
     function updateSummary() {
       const metricKeys = ['SIS', 'IFSR', 'CHT'];
       const centres = allData.centres;
@@ -1109,7 +1100,6 @@
       });
     }
 
-    // ----- Refresh data -----
     async function refreshData() {
       const newData = await fetchData();
       if (!newData) return;
@@ -1180,7 +1170,6 @@
       updateSummary();
     }
 
-    // ----- Navigation -----
     function goToSlide(index) {
       const slides = document.querySelectorAll('.slide');
       if (index < 0) index = 0;
@@ -1218,7 +1207,6 @@
       else { clearInterval(intervalId); intervalId = null; isPaused = true; document.querySelectorAll('.pause-btn').forEach(btn => btn.textContent = '▶'); }
     }
 
-    // ----- Fullscreen -----
     function toggleFullscreen() {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(err => {
@@ -1231,7 +1219,6 @@
       }
     }
 
-    // ----- Events -----
     document.addEventListener('click', (e) => {
       const target = e.target.closest('button');
       if (!target) return;
@@ -1271,7 +1258,6 @@
       if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
     });
 
-    // ----- Init -----
     const initialData = await fetchData();
     if (!initialData) {
       document.body.innerHTML = `<div style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#b91c1c;font-size:2.5rem;background:#f2f5f9;">⚠️ Could not load data.json</div>`;
