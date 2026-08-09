@@ -4,13 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin – TP vs WNS</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: #f1f5f9;
       font-family: 'Segoe UI', Roboto, sans-serif;
       padding: 2rem;
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       position: relative;
     }
@@ -79,18 +80,44 @@
     .btn-primary:hover { background: #0f172a; transform: scale(1.02); }
     .btn-success { background: #10b981; color: white; }
     .btn-success:hover { background: #059669; transform: scale(1.02); }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-warning:hover { background: #d97706; transform: scale(1.02); }
     .btn-danger { background: #ef4444; color: white; }
     .btn-danger:hover { background: #dc2626; }
     #status { padding: 0.8rem 1.2rem; border-radius: 12px; background: #f1f5f9; color: #0f172a; font-weight: 500; min-width: 200px; text-align: center; }
     .token-hint { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; background: #f1f5f9; padding: 0.6rem 1rem; border-radius: 10px; }
     .token-hint code { background: #e2e8f0; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; }
-    @media (max-width: 700px) {
-      .grid-3 { grid-template-columns: 1fr; }
-      .centre-grid { grid-template-columns: 1fr; }
-      .metric-row { grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; }
-    }
 
-    /* Login overlay */
+    /* File upload area */
+    .upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      transition: 0.3s;
+      background: #f8fafc;
+    }
+    .upload-area.dragover { border-color: #3b82f6; background: #eff6ff; }
+    .upload-area input[type="file"] { display: none; }
+    .upload-area .upload-btn {
+      display: inline-block;
+      background: #3b82f6;
+      color: white;
+      padding: 0.6rem 1.8rem;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    .upload-area .upload-btn:hover { background: #2563eb; }
+    .upload-area .file-name { margin-top: 0.5rem; color: #475569; }
+    .upload-area .preview-table { margin-top: 1rem; overflow-x: auto; }
+    .upload-area .preview-table table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .upload-area .preview-table th, .upload-area .preview-table td { border: 1px solid #e2e8f0; padding: 0.4rem 0.6rem; text-align: left; }
+    .upload-area .preview-table th { background: #f1f5f9; font-weight: 600; }
+
+    /* Login overlay (unchanged) */
     #loginOverlay {
       position: fixed;
       top: 0;
@@ -99,13 +126,14 @@
       height: 100%;
       background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(12px);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 9999;
       flex-direction: column;
       gap: 1.5rem;
     }
+    #loginOverlay.show { display: flex; }
     #loginOverlay .login-box {
       background: white;
       padding: 2.5rem 3rem;
@@ -164,18 +192,20 @@
       background: #0f172a;
       transform: scale(1.02);
     }
-    #adminContent {
-      display: none;
-    }
-    #adminContent.visible {
-      display: block;
+    #adminContent { display: none; }
+    #adminContent.visible { display: block; }
+
+    @media (max-width: 700px) {
+      .grid-3 { grid-template-columns: 1fr; }
+      .centre-grid { grid-template-columns: 1fr; }
+      .metric-row { grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; }
     }
   </style>
 </head>
 <body>
 
 <!-- Login Overlay -->
-<div id="loginOverlay">
+<div id="loginOverlay" class="show">
   <div class="login-box">
     <h2>🔐 Admin Access</h2>
     <p>Enter the security PIN to continue</p>
@@ -185,11 +215,25 @@
   </div>
 </div>
 
-<!-- Main Admin Content (hidden until login) -->
+<!-- Main Admin Content -->
 <div id="adminContent">
   <h1>📊 Admin Panel</h1>
   <p class="sub">TP vs WNS – Update data &amp; publish to <code>data.json</code></p>
 
+  <!-- File Upload Section -->
+  <div class="card">
+    <h2>📂 Upload Excel / CSV</h2>
+    <div class="upload-area" id="uploadArea">
+      <p style="margin-bottom:0.8rem;font-weight:500;">Drag &amp; drop your file here, or click to browse</p>
+      <label class="upload-btn" for="fileInput">📎 Choose File</label>
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" />
+      <div class="file-name" id="fileName">No file selected</div>
+      <div class="preview-table" id="previewTable" style="display:none;"></div>
+      <button class="btn btn-warning" id="applyFileBtn" style="margin-top:1rem;display:none;">📥 Apply Data to Forms</button>
+    </div>
+  </div>
+
+  <!-- Global Targets -->
   <div class="card">
     <h2>🎯 Global Targets</h2>
     <div class="grid-3" id="targetsContainer">
@@ -197,6 +241,7 @@
     </div>
   </div>
 
+  <!-- Centre Data -->
   <div class="card">
     <h2>🏢 Centre Data (Current &amp; Previous)</h2>
     <div class="centre-grid" id="centresContainer">
@@ -204,6 +249,7 @@
     </div>
   </div>
 
+  <!-- Actions -->
   <div class="card">
     <div class="actions">
       <button class="btn btn-primary" id="loadBtn">📥 Load from data.json</button>
@@ -219,22 +265,16 @@
 </div>
 
 <script>
-  // ===== SECURITY PIN =====
-  // Change this to your desired PIN
-  const ADMIN_PIN = '1234';
-
   // ===== CONFIG =====
-  // Set your GitHub token here OR leave blank to be prompted.
-  const GITHUB_TOKEN = ''; // <-- paste your token here if you want to skip prompts
-
-  const REPO_OWNER = 'YOUR_USERNAME';      // <-- change to your GitHub username
-  const REPO_NAME   = 'YOUR_REPO_NAME';     // <-- change to your repo name
+  const ADMIN_PIN = '1234';  // Change this
+  const GITHUB_TOKEN = '';   // Optional: paste token here
+  const REPO_OWNER = 'YOUR_USERNAME';
+  const REPO_NAME   = 'YOUR_REPO_NAME';
   const FILE_PATH   = 'data.json';
   const BRANCH      = 'main';
 
   // ===== LOGIN LOGIC =====
   function checkLogin() {
-    // Check sessionStorage
     if (sessionStorage.getItem('admin_logged_in') === 'true') {
       showAdmin();
       return true;
@@ -243,9 +283,8 @@
   }
 
   function showAdmin() {
-    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('loginOverlay').classList.remove('show');
     document.getElementById('adminContent').classList.add('visible');
-    // Load data automatically after login
     loadData();
   }
 
@@ -263,28 +302,32 @@
     }
   }
 
-  // Event listeners for login
   document.getElementById('loginBtn').addEventListener('click', attemptLogin);
   document.getElementById('pinInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') attemptLogin();
   });
 
-  // Check login on load
   if (!checkLogin()) {
-    document.getElementById('loginOverlay').style.display = 'flex';
+    document.getElementById('loginOverlay').classList.add('show');
   }
 
-  // ===== ADMIN FUNCTIONALITY (same as before) =====
+  // ===== ADMIN FUNCTIONALITY =====
   let currentData = null;
   const targetsContainer = document.getElementById('targetsContainer');
   const centresContainer = document.getElementById('centresContainer');
   const statusEl = document.getElementById('status');
+  const fileInput = document.getElementById('fileInput');
+  const fileName = document.getElementById('fileName');
+  const previewTable = document.getElementById('previewTable');
+  const applyFileBtn = document.getElementById('applyFileBtn');
+  const uploadArea = document.getElementById('uploadArea');
 
   function setStatus(msg, isError = false) {
     statusEl.textContent = msg;
     statusEl.style.color = isError ? '#dc2626' : '#0f172a';
   }
 
+  // ---- Build forms ----
   function buildForms(data) {
     currentData = data;
     targetsContainer.innerHTML = '';
@@ -301,7 +344,7 @@
     });
 
     centresContainer.innerHTML = '';
-    data.centres.forEach((centre, idx) => {
+    data.centres.forEach((centre) => {
       const box = document.createElement('div');
       box.className = `centre-box ${centre.name.toLowerCase() === 'wns' ? 'wns' : ''}`;
       const colourDot = `<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${centre.colour};margin-right:6px;"></span>`;
@@ -356,6 +399,7 @@
     return { targets, centres };
   }
 
+  // ---- Load from GitHub ----
   async function loadData() {
     if (!document.getElementById('adminContent').classList.contains('visible')) return;
     setStatus('Loading...');
@@ -363,6 +407,12 @@
       const res = await fetch(FILE_PATH + '?t=' + Date.now());
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      // Ensure history exists (add empty array if missing)
+      data.centres.forEach(c => {
+        ['SIS','IFSR','CHT'].forEach(m => {
+          if (!c.metrics[m].history) c.metrics[m].history = [];
+        });
+      });
       buildForms(data);
       setStatus('✅ Loaded from ' + FILE_PATH);
     } catch (e) {
@@ -370,6 +420,7 @@
     }
   }
 
+  // ---- Publish to GitHub ----
   async function publishData() {
     const data = collectData();
     const jsonStr = JSON.stringify(data, null, 2);
@@ -430,12 +481,256 @@
     }
   }
 
+  // ---- Excel/CSV Parser ----
+  function parseFileData(workbook) {
+    // Assume first sheet
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+    // data is an array of arrays (rows)
+
+    // Find row indices for "TP" and "WNS"
+    let tpRow = -1, wnsRow = -1;
+    let sssRowOffset = -1; // we'll find "SSS" under each
+    // Also need to find the column indices for months – they are in the first row after the "TP"/"WNS" headings?
+    // Actually from sample: 
+    // Row 1: [ '', '', 'TP', '', 'July', 'August' ] (so columns: A,B,C,D,E,F)
+    // Row 2: [ '', '', 'SSS', 'CHT', 823, 829 ]
+    // So we need to find the row where col C is "TP" and then below it find "SSS", then find rows with metric names.
+
+    // We'll build a structure: for each centre, find the SSS block and extract metrics.
+
+    // First, determine month columns: they are in row 1 (index 0) after col D? Actually row 0 has empty cells until col D? Let's inspect.
+    // We'll scan the first row for non-empty strings that look like month names (e.g., "July", "August").
+    // Then we'll collect those column indices and names.
+
+    const monthCols = [];
+    if (data.length > 0) {
+      const headerRow = data[0];
+      headerRow.forEach((cell, idx) => {
+        if (typeof cell === 'string' && /^(January|February|March|April|May|June|July|August|September|October|November|December)/i.test(cell.trim())) {
+          monthCols.push({ col: idx, name: cell.trim() });
+        }
+      });
+    }
+
+    // Now find centre blocks.
+    // We'll scan rows for first column (index 0) containing "TP" or "WNS" (case-insensitive) and then look for "SSS" in col C (index 2).
+    // Actually sample: "TP" is in col C (index 2), "SSS" is below it in col C (index 2) as well.
+    // Simpler: we'll search for rows where cell at index 2 (col C) is "TP" or "WNS".
+    // Then, starting from that row+1, find the row where cell at index 2 is "SSS".
+    // Then, from that row+1, scan for rows where cell at index 3 (col D) is a metric name (CHT, IFSR, Phone SIS, etc.) and extract the month values.
+
+    const centres = ['TP', 'WNS'];
+    const extracted = {};
+
+    centres.forEach(centreName => {
+      // Find the row where cell index 2 equals centreName
+      let centreRowIdx = -1;
+      for (let i = 0; i < data.length; i++) {
+        if (data[i][2] && data[i][2].trim().toUpperCase() === centreName.toUpperCase()) {
+          centreRowIdx = i;
+          break;
+        }
+      }
+      if (centreRowIdx === -1) return;
+
+      // Find "SSS" below this row
+      let sssRowIdx = -1;
+      for (let i = centreRowIdx + 1; i < data.length; i++) {
+        if (data[i][2] && data[i][2].trim().toUpperCase() === 'SSS') {
+          sssRowIdx = i;
+          break;
+        }
+      }
+      if (sssRowIdx === -1) return;
+
+      // Now scan rows below sssRowIdx for metrics
+      // The metric rows have metric name in col D (index 3) and values in month columns.
+      const metrics = {};
+      for (let i = sssRowIdx + 1; i < data.length; i++) {
+        const row = data[i];
+        const metricName = row[3] ? row[3].toString().trim() : '';
+        if (!metricName) break; // assume end of block
+
+        // Map metric names to our keys
+        let key = null;
+        if (metricName.toUpperCase() === 'CHT') key = 'CHT';
+        else if (metricName.toUpperCase() === 'IFSR') key = 'IFSR';
+        else if (metricName.toUpperCase() === 'PHONE SIS') key = 'SIS';
+        else continue;
+
+        // Extract values from month columns
+        const values = monthCols.map(mc => {
+          const val = row[mc.col];
+          return parseFloat(val) || 0;
+        });
+
+        // Filter out zeros? Keep all.
+        metrics[key] = values;
+      }
+
+      // We now have values for each month for this centre's metrics.
+      // We need to set current = latest month (last in array), previous = second last, history = all.
+      const result = {};
+      for (const [key, vals] of Object.entries(metrics)) {
+        if (vals.length === 0) continue;
+        const filtered = vals.filter(v => !isNaN(v) && v !== 0);
+        if (filtered.length === 0) continue;
+        const current = filtered[filtered.length - 1];
+        const previous = filtered.length > 1 ? filtered[filtered.length - 2] : current;
+        const history = filtered;
+        result[key] = { current, previous, history };
+      }
+      extracted[centreName] = result;
+    });
+
+    return { monthCols, extracted };
+  }
+
+  // ---- Apply parsed data to forms ----
+  function applyParsedData(parsed) {
+    const { extracted } = parsed;
+    if (!extracted.TP || !extracted.WNS) {
+      setStatus('❌ Could not find data for both TP and WNS', true);
+      return;
+    }
+
+    // Update the form fields
+    // We'll load current data first (if any) to preserve targets and colours, then override metrics.
+    // But we'll just directly set the input fields.
+    ['TP', 'WNS'].forEach(centre => {
+      const metrics = extracted[centre];
+      ['SIS', 'IFSR', 'CHT'].forEach(metric => {
+        const data = metrics[metric];
+        if (!data) return;
+        const currentEl = document.getElementById(`${centre}-${metric}-current`);
+        const prevEl = document.getElementById(`${centre}-${metric}-previous`);
+        if (currentEl) currentEl.value = data.current;
+        if (prevEl) prevEl.value = data.previous;
+      });
+    });
+
+    // Also update the history arrays in currentData? We'll store them in a hidden way or we can add them to currentData and then publish.
+    // But the current data object (currentData) will be used when publishing, and we'll include history.
+    // Since we're only updating the form fields, we need to update the currentData object as well before publishing.
+    // We'll do that in the collectData function – it already reads from form fields, but we need to include history.
+    // We'll store the history in a global variable and merge it during collectData.
+    // For simplicity, we'll just store the parsed history in a separate variable and in collectData, we'll fetch it from there.
+    // But easier: we can update currentData.centres directly.
+    if (currentData) {
+      ['TP', 'WNS'].forEach(centre => {
+        const centreObj = currentData.centres.find(c => c.name === centre);
+        if (!centreObj) return;
+        const metrics = extracted[centre];
+        ['SIS', 'IFSR', 'CHT'].forEach(metric => {
+          const data = metrics[metric];
+          if (!data) return;
+          centreObj.metrics[metric].history = data.history || [];
+        });
+      });
+    }
+
+    setStatus('✅ Data applied from file. Review and publish.');
+  }
+
+  // ---- File upload handlers ----
+  fileInput.addEventListener('change', function(e) {
+    const file = this.files[0];
+    if (!file) return;
+    fileName.textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = function(loadEvent) {
+      try {
+        const data = new Uint8Array(loadEvent.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const parsed = parseFileData(workbook);
+        // Show preview
+        previewTable.style.display = 'block';
+        let html = '<table><thead><tr><th>Centre</th><th>Metric</th><th>Current</th><th>Previous</th><th>History</th></tr></thead><tbody>';
+        ['TP', 'WNS'].forEach(centre => {
+          const metrics = parsed.extracted[centre];
+          if (!metrics) return;
+          ['SIS', 'IFSR', 'CHT'].forEach(metric => {
+            const data = metrics[metric];
+            if (!data) return;
+            html += `<tr><td>${centre}</td><td>${metric}</td><td>${data.current}</td><td>${data.previous}</td><td>[${data.history.join(', ')}]</td></tr>`;
+          });
+        });
+        html += '</tbody></table>';
+        previewTable.innerHTML = html;
+        applyFileBtn.style.display = 'inline-block';
+
+        // Store parsed data for apply
+        window._parsedFile = parsed;
+      } catch(err) {
+        setStatus('❌ Failed to parse file: ' + err.message, true);
+        previewTable.style.display = 'none';
+        applyFileBtn.style.display = 'none';
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  // Drag and drop
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+  });
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+  });
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length) {
+      fileInput.files = files;
+      fileInput.dispatchEvent(new Event('change'));
+    }
+  });
+
+  applyFileBtn.addEventListener('click', function() {
+    if (window._parsedFile) {
+      applyParsedData(window._parsedFile);
+      // Optionally, also load the data to refresh forms? The applyParsedData already updates inputs.
+      // Also need to update currentData's history.
+      // We already updated currentData in applyParsedData.
+    }
+  });
+
+  // ---- Event bindings ----
   document.getElementById('loadBtn').addEventListener('click', loadData);
   document.getElementById('publishBtn').addEventListener('click', publishData);
 
-  // If already logged in, load data (handled inside showAdmin)
-  // For safety, also call loadData when admin becomes visible
-  // Already called in showAdmin
+  // If already logged in, load data (done in showAdmin)
+  // Also, we need to ensure that collectData includes history from currentData when publishing.
+  // We'll override collectData to also include history from currentData if it exists.
+  const originalCollect = collectData;
+  collectData = function() {
+    const data = originalCollect();
+    // Merge history from currentData into each centre/metric
+    if (currentData) {
+      data.centres.forEach((c, idx) => {
+        const orig = currentData.centres.find(oc => oc.name === c.name);
+        if (orig) {
+          ['SIS','IFSR','CHT'].forEach(m => {
+            if (orig.metrics[m].history) {
+              c.metrics[m].history = orig.metrics[m].history;
+            }
+          });
+        }
+      });
+    }
+    return data;
+  };
+
+  // Also when loading, we need to populate history into currentData.
+  // The loadData function already builds forms and sets currentData.
+  // We'll add a step to set history from the loaded data.
+  // Already done in loadData.
+
+  console.log('Admin ready. Upload Excel/CSV to auto-fill data.');
 </script>
 </body>
 </html>
