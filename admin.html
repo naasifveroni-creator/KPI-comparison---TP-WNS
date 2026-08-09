@@ -118,7 +118,6 @@
     .upload-area .preview-table th, .upload-area .preview-table td { border: 1px solid #e2e8f0; padding: 0.4rem 0.6rem; text-align: left; }
     .upload-area .preview-table th { background: #f1f5f9; font-weight: 600; }
 
-    /* History log & rollback */
     .history-log {
       max-height: 300px;
       overflow-y: auto;
@@ -139,7 +138,6 @@
     .history-entry .user { font-weight: 600; color: #0f172a; }
     .history-entry .rollback-btn { font-size: 0.8rem; padding: 0.2rem 1rem; }
 
-    /* Preview modal */
     .modal {
       display: none;
       position: fixed;
@@ -176,7 +174,6 @@
     .modal-content .close-btn:hover { color: #0f172a; }
     .modal-content .preview-chart { width: 100%; max-height: 300px; }
 
-    /* Schedule section */
     .schedule-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -193,7 +190,6 @@
     }
     .schedule-status { margin-top: 0.5rem; font-weight: 500; }
 
-    /* Login overlay */
     #loginOverlay {
       position: fixed;
       top: 0;
@@ -297,7 +293,6 @@
   <h1>📊 Admin Panel</h1>
   <p class="sub">TP vs WNS – Update data &amp; publish to <code>data.json</code></p>
 
-  <!-- File Upload -->
   <div class="card">
     <h2>📂 Upload Excel / CSV</h2>
     <div class="upload-area" id="uploadArea">
@@ -310,19 +305,16 @@
     </div>
   </div>
 
-  <!-- Global Targets -->
   <div class="card">
     <h2>🎯 Global Targets</h2>
     <div class="grid-3" id="targetsContainer"></div>
   </div>
 
-  <!-- Centre Data -->
   <div class="card">
     <h2>🏢 Centre Data (Current &amp; Previous)</h2>
     <div class="centre-grid" id="centresContainer"></div>
   </div>
 
-  <!-- Preview & Export -->
   <div class="card">
     <h2>👁️ Preview &amp; Export</h2>
     <div style="display:flex;gap:1rem;flex-wrap:wrap;">
@@ -331,7 +323,6 @@
     </div>
   </div>
 
-  <!-- History & Rollback -->
   <div class="card">
     <h2>📜 Publish History &amp; Rollback</h2>
     <div id="historyContainer" class="history-log">
@@ -339,7 +330,6 @@
     </div>
   </div>
 
-  <!-- Schedule Auto-Publish -->
   <div class="card">
     <h2>⏰ Scheduled Auto-Publish</h2>
     <div class="schedule-grid">
@@ -363,7 +353,6 @@
     <div class="schedule-status" id="scheduleStatus">⏸️ Not scheduled</div>
   </div>
 
-  <!-- Actions -->
   <div class="card">
     <div class="actions">
       <button class="btn btn-primary" id="loadBtn">📥 Load from data.json</button>
@@ -403,10 +392,32 @@
   // ===== CONFIG =====
   const ADMIN_PIN = '1234';
   const GITHUB_TOKEN = '';   // Optional: paste token here
-  const REPO_OWNER = 'YOUR_USERNAME';
-  const REPO_NAME   = 'YOUR_REPO_NAME';
   const FILE_PATH   = 'data.json';
   const BRANCH      = 'main';
+
+  // ----- Auto-detect repo owner and name from URL -----
+  let REPO_OWNER = 'YOUR_USERNAME';
+  let REPO_NAME   = 'YOUR_REPO_NAME';
+
+  try {
+    const hostParts = window.location.hostname.split('.');
+    const pathParts = window.location.pathname.split('/').filter(p => p);
+    
+    // GitHub Pages: username.github.io[/repo]
+    if (hostParts.length >= 3 && hostParts[1] === 'github' && hostParts[2] === 'io') {
+      REPO_OWNER = hostParts[0];
+      if (pathParts.length > 0) {
+        REPO_NAME = pathParts[0];
+      }
+    }
+    // If it's a custom domain, we keep the placeholders – you'll see a warning.
+  } catch(e) {
+    console.warn('Could not auto-detect repo, using placeholders.');
+  }
+
+  if (REPO_OWNER === 'YOUR_USERNAME' || REPO_NAME === 'YOUR_REPO_NAME') {
+    console.warn('⚠️ Admin: Auto-detection failed. Please set REPO_OWNER and REPO_NAME manually in admin.html if needed.');
+  }
 
   // ===== LOGIN =====
   function checkLogin() {
@@ -466,7 +477,6 @@
   // ---- Build forms ----
   function buildForms(data) {
     currentData = data;
-    // Ensure historyLog exists
     if (!currentData.historyLog) currentData.historyLog = [];
     historyLog = currentData.historyLog;
 
@@ -523,7 +533,7 @@
         metrics[metric] = {
           current: parseFloat(cur.value) || 0,
           previous: parseFloat(prev.value) || 0,
-          history: [] // will be filled from currentData later
+          history: []
         };
       });
       let colour = (name === 'TP' ? '#3b82f6' : '#f59e0b');
@@ -534,7 +544,6 @@
       centres.push({ name, colour, metrics });
     });
 
-    // Preserve history from currentData (if any)
     if (currentData) {
       centres.forEach((c, idx) => {
         const orig = currentData.centres.find(oc => oc.name === c.name);
@@ -551,13 +560,12 @@
     return { targets, centres };
   }
 
-  // ---- Data Validation ----
+  // ---- Validation ----
   function validateData(data) {
     const warnings = [];
     const errors = [];
     const { targets, centres } = data;
 
-    // Target validation
     if (targets.SIS < 0 || targets.SIS > 100) errors.push('SIS target must be between 0 and 100.');
     if (targets.IFSR < 0 || targets.IFSR > 100) errors.push('IFSR target must be between 0 and 100.');
     if (targets.CHT < 100 || targets.CHT > 1500) warnings.push('CHT target is outside typical range (100-1500s).');
@@ -574,11 +582,10 @@
     return { errors, warnings };
   }
 
-  // ---- Publish (with validation and history log) ----
+  // ---- Publish ----
   async function publishData() {
     const data = collectData();
 
-    // Validate
     const validation = validateData(data);
     if (validation.errors.length > 0) {
       alert('❌ Errors:\n' + validation.errors.join('\n'));
@@ -590,15 +597,11 @@
       }
     }
 
-    // Add timestamp
     data.lastUpdated = new Date().toISOString();
-    // Get user from token or default
-    const user = GITHUB_TOKEN ? 'admin' : 'admin'; // Could extract from token if we had user info
+    const user = GITHUB_TOKEN ? 'admin' : 'admin';
     data.lastUpdatedBy = user;
 
-    // Append to history log (full snapshot)
-    const snapshot = JSON.parse(JSON.stringify(data)); // deep copy
-    // Remove historyLog from snapshot to avoid infinite nesting
+    const snapshot = JSON.parse(JSON.stringify(data));
     delete snapshot.historyLog;
     if (!data.historyLog) data.historyLog = [];
     data.historyLog.push({
@@ -606,7 +609,6 @@
       user: user,
       snapshot: snapshot
     });
-    // Keep only last 20 entries to avoid huge file
     if (data.historyLog.length > 20) data.historyLog.shift();
 
     const jsonStr = JSON.stringify(data, null, 2);
@@ -660,7 +662,6 @@
       }
 
       setStatus('✅ Published successfully to GitHub!');
-      // Reload data to refresh history
       setTimeout(() => loadData(), 1500);
     } catch (e) {
       setStatus('❌ Publish failed: ' + e.message, true);
@@ -668,7 +669,7 @@
     }
   }
 
-  // ---- Load from GitHub ----
+  // ---- Load ----
   async function loadData() {
     if (!document.getElementById('adminContent').classList.contains('visible')) return;
     setStatus('Loading...');
@@ -689,14 +690,13 @@
     }
   }
 
-  // ---- History rendering ----
+  // ---- History ----
   function renderHistory() {
     if (!currentData || !currentData.historyLog || currentData.historyLog.length === 0) {
       historyContainer.innerHTML = '<p style="color:#94a3b8;text-align:center;">No history yet. Publish data to start logging.</p>';
       return;
     }
     let html = '';
-    // Show latest first (reverse)
     const entries = [...currentData.historyLog].reverse();
     entries.forEach((entry, idx) => {
       const date = new Date(entry.timestamp);
@@ -715,7 +715,6 @@
     });
     historyContainer.innerHTML = html;
 
-    // Attach rollback events
     document.querySelectorAll('.rollback-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const idx = parseInt(this.dataset.index);
@@ -727,7 +726,6 @@
   // ---- Rollback ----
   function rollbackTo(index) {
     if (!currentData || !currentData.historyLog) return;
-    // 'index' is from reversed array, so we need to map back
     const entries = [...currentData.historyLog].reverse();
     const entry = entries[index];
     if (!entry || !entry.snapshot) {
@@ -737,30 +735,22 @@
     if (!confirm(`Roll back to the state from ${new Date(entry.timestamp).toLocaleString()}? This will restore the data in the forms. You can then publish it.`)) {
       return;
     }
-    // Apply snapshot to forms
     const snapshot = entry.snapshot;
-    // We need to rebuild forms with this snapshot data
-    // But we also need to keep the historyLog from currentData? We'll just replace data.
-    // We'll set currentData to snapshot and rebuild forms, but we must preserve the historyLog from currentData.
-    // Actually, we want to keep the existing historyLog, and just restore the target/centre values.
-    // So we'll copy the snapshot's targets and centres into currentData, but keep the historyLog.
     const oldHistory = currentData.historyLog;
     currentData.targets = snapshot.targets;
     currentData.centres = snapshot.centres;
-    currentData.historyLog = oldHistory; // keep the full log
-    // Also update lastUpdated etc? We'll keep as is.
+    currentData.historyLog = oldHistory;
     buildForms(currentData);
     setStatus('✅ Rolled back to snapshot. Review and publish to make it live.');
   }
 
-  // ---- Export as Excel ----
+  // ---- Export ----
   function exportExcel() {
     if (!currentData) {
       alert('Load data first.');
       return;
     }
-    const data = collectData(); // get current form data
-    // Build a flat table for export
+    const data = collectData();
     const rows = [
       ['Metric', 'TP Current', 'TP Previous', 'WNS Current', 'WNS Previous', 'Target']
     ];
@@ -776,11 +766,9 @@
         data.targets[m]
       ]);
     });
-    // Add history? Could add a second sheet.
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(rows);
     XLSX.utils.book_append_sheet(wb, ws, 'Data');
-    // Add history log as a second sheet if exists
     if (currentData.historyLog && currentData.historyLog.length > 0) {
       const historyRows = [['Timestamp', 'User', 'Snapshot (summary)']];
       currentData.historyLog.forEach(entry => {
@@ -797,12 +785,10 @@
     setStatus('✅ Export complete.');
   }
 
-  // ---- Dashboard Preview ----
+  // ---- Preview ----
   let previewCharts = {};
 
   function updatePreviewCharts() {
-    // This will be called when forms change, but we'll also call on load.
-    // We'll use the currentData to populate.
     if (!currentData) return;
     const tp = currentData.centres.find(c => c.name === 'TP');
     const wns = currentData.centres.find(c => c.name === 'WNS');
@@ -812,15 +798,10 @@
     const wnsVal = wns.metrics.SIS.current;
     document.getElementById('previewTPVal').textContent = tpVal + '%';
     document.getElementById('previewWNSVal').textContent = wnsVal + '%';
-
-    // Draw preview charts if modal is open? We'll draw when modal opens.
-    // We'll store the data and draw on modal open.
   }
 
   function openPreview() {
-    const modal = document.getElementById('previewModal');
-    modal.classList.add('open');
-    // Draw charts
+    document.getElementById('previewModal').classList.add('open');
     drawPreviewChart('previewChartTP', 'TP');
     drawPreviewChart('previewChartWNS', 'WNS');
   }
@@ -829,14 +810,12 @@
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    // Destroy existing chart if any
     if (previewCharts[canvasId]) previewCharts[canvasId].destroy();
     const centre = currentData.centres.find(c => c.name === centreName);
     if (!centre) return;
     const metric = centre.metrics.SIS;
     const current = metric.current;
     const target = currentData.targets.SIS;
-    const isHigher = true; // SIS is higher is better
     let met = current >= target;
     let fillPercent = Math.min((current / target) * 100, 100);
     const colour = met ? '#10b981' : '#f59e0b';
@@ -862,7 +841,7 @@
     previewCharts[canvasId] = chart;
   }
 
-  // ---- Schedule Auto-Publish ----
+  // ---- Schedule ----
   function loadSchedule() {
     const saved = localStorage.getItem('scheduleConfig');
     if (saved) {
@@ -898,14 +877,12 @@
   function startSchedule(config) {
     stopSchedule();
     if (!config.enabled) return;
-    // Check immediately?
     scheduleIntervalId = setInterval(async () => {
       try {
         const res = await fetch(config.url + '?t=' + Date.now());
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const blob = await res.blob();
         const file = new File([blob], 'scheduled.xlsx', { type: blob.type });
-        // Parse the file using the same parser
         const reader = new FileReader();
         reader.onload = async function(e) {
           try {
@@ -916,10 +893,7 @@
               console.warn('Scheduled file missing TP/WNS data.');
               return;
             }
-            // Compare with current data? We'll need to load current data.
-            // We'll use the currentData if available, or fetch first.
             if (!currentData) await loadData();
-            // Check if new data differs significantly (e.g., any current value different)
             let changed = false;
             ['TP','WNS'].forEach(centre => {
               ['SIS','IFSR','CHT'].forEach(metric => {
@@ -931,9 +905,7 @@
               });
             });
             if (changed) {
-              // Apply parsed data to forms and publish
               applyParsedData(parsed);
-              // Wait a bit then publish
               setTimeout(async () => {
                 await publishData();
                 scheduleStatus.textContent = `✅ Auto-published at ${new Date().toLocaleTimeString()}`;
@@ -962,7 +934,7 @@
     }
   }
 
-  // ---- File upload parser (same as before, but extracted to reuse) ----
+  // ---- Parser & apply ----
   function parseFileData(workbook) {
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
@@ -1031,7 +1003,6 @@
     return { monthCols, extracted };
   }
 
-  // ---- Apply parsed data to forms ----
   function applyParsedData(parsed) {
     const { extracted } = parsed;
     if (!extracted.TP || !extracted.WNS) {
@@ -1051,7 +1022,6 @@
       });
     });
 
-    // Update history in currentData
     if (currentData) {
       ['TP', 'WNS'].forEach(centre => {
         const centreObj = currentData.centres.find(c => c.name === centre);
@@ -1066,11 +1036,10 @@
     }
 
     setStatus('✅ Data applied from file. Review and publish.');
-    // Also update preview
     updatePreviewCharts();
   }
 
-  // ---- File upload handlers ----
+  // ---- File handlers ----
   const fileInput = document.getElementById('fileInput');
   const fileName = document.getElementById('fileName');
   const previewTable = document.getElementById('previewTable');
@@ -1140,14 +1109,12 @@
   });
   document.getElementById('scheduleSaveBtn').addEventListener('click', saveSchedule);
 
-  // Also close modal on backdrop click
   document.getElementById('previewModal').addEventListener('click', function(e) {
     if (e.target === this) this.classList.remove('open');
   });
 
   // ---- Init ----
   loadSchedule();
-  // Update preview charts on any form change (debounced)
   let previewTimeout;
   document.addEventListener('input', function(e) {
     if (e.target.closest('.metric-row input') || e.target.closest('.grid-3 input')) {
@@ -1158,7 +1125,7 @@
     }
   });
 
-  console.log('Admin ready with full power features.');
+  console.log('Admin ready with full power features. Repo auto-detected:', REPO_OWNER + '/' + REPO_NAME);
 </script>
 </body>
 </html>
