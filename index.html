@@ -11,7 +11,6 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* ----- LIGHT THEME (keep as is) ----- */
     :root {
       --bg: #f2f5f9;
       --card-bg: rgba(255,255,255,0.85);
@@ -37,7 +36,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding-top: 7vh; /* space for fixed brand bar */
+      padding-top: 7vh;
     }
     body::before {
       content: '';
@@ -62,7 +61,7 @@
       z-index: 0;
     }
 
-    /* ----- Brand Bar (fixed top, light) ----- */
+    /* Brand Bar (fixed top, light) */
     .brand-bar {
       position: fixed;
       top: 0;
@@ -101,7 +100,6 @@
       object-fit: contain;
     }
 
-    /* ----- Slides container ----- */
     .slides {
       flex: 1;
       width: 100%;
@@ -325,10 +323,11 @@
       gap: 0.6vw;
     }
     .details-area .centre-name .logo-icon {
-      height: 3vh;
+      height: 4vh;
       width: auto;
       object-fit: contain;
     }
+    /* No text next to logo – only the logo */
 
     .details-area .main-value {
       font-size: 8vh;
@@ -566,7 +565,7 @@
       transition: width 0.6s ease;
     }
 
-    /* Timestamp footer (light) */
+    /* Timestamp footer */
     #lastUpdatedFooter {
       position: fixed;
       bottom: 1.5vh;
@@ -619,13 +618,13 @@
 </head>
 <body>
 
-<!-- ===== BRAND BAR (LIGHT) ===== -->
+<!-- Brand Bar -->
 <div class="brand-bar">
   <div class="brand-left">
-    <img src="assets/delta-logo.png" alt="Delta Airlines" />
+    <img src="assets/delta-logo.png" alt="Delta Airlines" onerror="this.style.display='none'" />
   </div>
   <div class="brand-right">
-    <img src="assets/tp-logo.png" alt="Teleperformance" />
+    <img src="assets/tp-logo.png" alt="Teleperformance" onerror="this.style.display='none'" />
   </div>
 </div>
 
@@ -723,7 +722,7 @@
       }
     }
 
-    // ----- Build slides -----
+    // ----- Build slides (logos: TP-logo.png, wns-logo.png, delta-logo.png) -----
     function buildSlides(data) {
       const container = document.getElementById('slidesContainer');
       container.innerHTML = '';
@@ -794,13 +793,19 @@
           const details = document.createElement('div');
           details.className = 'details-area';
           const dotColour = centre.colour;
-          // Build logo path dynamically
-          const logoPath = `assets/${centre.name.toLowerCase()}-logo.png`;
+          // LOGO PATHS – exact filenames from your repo
+          let logoPath;
+          if (centre.name === 'TP') {
+            logoPath = 'assets/TP-logo.png';
+          } else if (centre.name === 'WNS') {
+            logoPath = 'assets/wns-logo.png';
+          } else {
+            logoPath = `assets/${centre.name.toLowerCase()}-logo.png`;
+          }
 
           details.innerHTML = `
             <div class="centre-name">
-              <img src="${logoPath}" alt="${centre.name} logo" class="logo-icon" />
-              ${centre.name}
+              <img src="${logoPath}" alt="${centre.name} logo" class="logo-icon" onerror="this.style.display='none'" />
             </div>
             <div class="main-value">
               <span id="val-${centre.name}-${metricKey}">—</span>
