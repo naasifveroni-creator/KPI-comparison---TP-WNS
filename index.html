@@ -36,7 +36,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding-top: 7vh;
+      padding-top: 12vh; /* space for fixed brand bar */
     }
     body::before {
       content: '';
@@ -61,45 +61,7 @@
       z-index: 0;
     }
 
-    /* Brand Bar (fixed top, light) */
-    .brand-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 6vh;
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--badge-border);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 2.5vw;
-      z-index: 1000;
-    }
-    .brand-bar .brand-left {
-      display: flex;
-      align-items: center;
-      gap: 1vw;
-    }
-    .brand-bar .brand-left img {
-      height: 15vh;
-      width: auto;
-      object-fit: contain;
-    }
-    .brand-bar .brand-right {
-      display: flex;
-      align-items: center;
-      gap: 1vw;
-    }
-    .brand-bar .brand-right img {
-      height: 3.2vh;
-      width: auto;
-      object-fit: contain;
-    }
-
+    /* Slides container – adjusted for brand bar height */
     .slides {
       flex: 1;
       width: 100%;
@@ -121,6 +83,7 @@
       flex-direction: column;
       gap: 2vh;
       padding: 2.5vh 3vw;
+      padding-top: 2vh;
       opacity: 0;
       transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
       pointer-events: none;
@@ -128,6 +91,48 @@
     .slide.active {
       opacity: 1;
       pointer-events: auto;
+    }
+
+    /* The brand bar itself – fixed, tall enough for logo */
+    .brand-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 12vh;          /* matches body padding-top */
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--badge-border);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2.5vw;
+      z-index: 1000;
+    }
+    .brand-bar .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 1vw;
+      height: 100%;
+    }
+    .brand-bar .brand-left img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      max-height: 100%;
+    }
+    .brand-bar .brand-right {
+      display: flex;
+      align-items: center;
+      gap: 1vw;
+      height: 100%;
+    }
+    .brand-bar .brand-right img {
+      height: 80%;      /* slightly smaller than the bar for balance */
+      width: auto;
+      object-fit: contain;
+      max-height: 80%;
     }
 
     .metric-header {
@@ -327,7 +332,6 @@
       width: auto;
       object-fit: contain;
     }
-    /* No text next to logo – only the logo */
 
     .details-area .main-value {
       font-size: 8vh;
@@ -588,9 +592,9 @@
     #lastUpdatedFooter:hover { opacity: 1; }
 
     @media (max-width: 768px) {
-      body { padding-top: 5vh; }
-      .brand-bar { height: 5vh; padding: 0 1.5vw; }
-      .brand-bar .brand-left img, .brand-bar .brand-right img { height: 2.4vh; }
+      body { padding-top: 8vh; }
+      .brand-bar { height: 8vh; padding: 0 1.5vw; }
+      .brand-bar .brand-left img, .brand-bar .brand-right img { height: 80%; }
       .slide { padding: 1.5vh 2vw; gap: 1.5vh; }
       .centre-card { flex-direction: column; padding: 1.5vh; }
       .chart-area { flex: 0 0 40%; width: 40%; }
@@ -618,13 +622,13 @@
 </head>
 <body>
 
-<!-- Brand Bar -->
+<!-- Brand Bar – fixed height = 12vh, logo fills it -->
 <div class="brand-bar">
   <div class="brand-left">
     <img src="assets/delta-logo.png" alt="Delta Airlines" onerror="this.style.display='none'" />
   </div>
   <div class="brand-right">
-    <img src="assets/tp-logo.png" alt="Teleperformance" onerror="this.style.display='none'" />
+    <img src="assets/TP-logo.png" alt="Teleperformance" onerror="this.style.display='none'" />
   </div>
 </div>
 
