@@ -36,7 +36,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding-top: 12vh; /* space for fixed brand bar */
+      padding-top: 7vh; /* matches brand bar height */
     }
     body::before {
       content: '';
@@ -61,7 +61,37 @@
       z-index: 0;
     }
 
-    /* Slides container – adjusted for brand bar height */
+    /* Brand Bar – minimal, Delta only */
+    .brand-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 7vh;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--badge-border);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+      display: flex;
+      justify-content: flex-start; /* Delta only on the left */
+      align-items: center;
+      padding: 0 2.5vw;
+      z-index: 1000;
+    }
+    .brand-bar .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 1vw;
+      height: 100%;
+    }
+    .brand-bar .brand-left img {
+      height: 100%;
+      width: auto;
+      object-fit: contain;
+      max-height: 100%;
+    }
+
+    /* Slides container */
     .slides {
       flex: 1;
       width: 100%;
@@ -83,7 +113,7 @@
       flex-direction: column;
       gap: 2vh;
       padding: 2.5vh 3vw;
-      padding-top: 2vh;
+      padding-top: 1vh;
       opacity: 0;
       transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
       pointer-events: none;
@@ -91,48 +121,6 @@
     .slide.active {
       opacity: 1;
       pointer-events: auto;
-    }
-
-    /* The brand bar itself – fixed, tall enough for logo */
-    .brand-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 12vh;          /* matches body padding-top */
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--badge-border);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 2.5vw;
-      z-index: 1000;
-    }
-    .brand-bar .brand-left {
-      display: flex;
-      align-items: center;
-      gap: 1vw;
-      height: 100%;
-    }
-    .brand-bar .brand-left img {
-      height: 100%;
-      width: auto;
-      object-fit: contain;
-      max-height: 100%;
-    }
-    .brand-bar .brand-right {
-      display: flex;
-      align-items: center;
-      gap: 1vw;
-      height: 100%;
-    }
-    .brand-bar .brand-right img {
-      height: 80%;      /* slightly smaller than the bar for balance */
-      width: auto;
-      object-fit: contain;
-      max-height: 80%;
     }
 
     .metric-header {
@@ -592,9 +580,9 @@
     #lastUpdatedFooter:hover { opacity: 1; }
 
     @media (max-width: 768px) {
-      body { padding-top: 8vh; }
-      .brand-bar { height: 8vh; padding: 0 1.5vw; }
-      .brand-bar .brand-left img, .brand-bar .brand-right img { height: 80%; }
+      body { padding-top: 6vh; }
+      .brand-bar { height: 6vh; padding: 0 1.5vw; }
+      .brand-bar .brand-left img { height: 80%; }
       .slide { padding: 1.5vh 2vw; gap: 1.5vh; }
       .centre-card { flex-direction: column; padding: 1.5vh; }
       .chart-area { flex: 0 0 40%; width: 40%; }
@@ -622,13 +610,10 @@
 </head>
 <body>
 
-<!-- Brand Bar – fixed height = 12vh, logo fills it -->
+<!-- Brand Bar – Delta only, minimal -->
 <div class="brand-bar">
   <div class="brand-left">
     <img src="assets/delta-logo.png" alt="Delta Airlines" onerror="this.style.display='none'" />
-  </div>
-  <div class="brand-right">
-    <img src="assets/TP-logo.png" alt="Teleperformance" onerror="this.style.display='none'" />
   </div>
 </div>
 
@@ -726,7 +711,7 @@
       }
     }
 
-    // ----- Build slides (logos: TP-logo.png, wns-logo.png, delta-logo.png) -----
+    // ----- Build slides -----
     function buildSlides(data) {
       const container = document.getElementById('slidesContainer');
       container.innerHTML = '';
@@ -797,7 +782,7 @@
           const details = document.createElement('div');
           details.className = 'details-area';
           const dotColour = centre.colour;
-          // LOGO PATHS – exact filenames from your repo
+          // LOGO PATHS
           let logoPath;
           if (centre.name === 'TP') {
             logoPath = 'assets/TP-logo.png';
