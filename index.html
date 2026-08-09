@@ -31,12 +31,12 @@
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
-      height: 100vh;
+      height: 100dvh; /* dynamic viewport height */
       width: 100vw;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding-top: 7vh; /* matches brand bar height */
+      padding-top: 10dvh; /* matches brand bar height in dvh */
     }
     body::before {
       content: '';
@@ -61,19 +61,19 @@
       z-index: 0;
     }
 
-    /* Brand Bar – minimal, Delta only */
+    /* Brand Bar – uses dvh for consistency */
     .brand-bar {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      height: 7vh;
+      height: 10dvh;
       background: rgba(255,255,255,0.85);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--badge-border);
       box-shadow: 0 2px 12px rgba(0,0,0,0.03);
       display: flex;
-      justify-content: flex-start; /* Delta only on the left */
+      justify-content: flex-start;
       align-items: center;
       padding: 0 2.5vw;
       z-index: 1000;
@@ -81,7 +81,6 @@
     .brand-bar .brand-left {
       display: flex;
       align-items: center;
-      gap: 1vw;
       height: 100%;
     }
     .brand-bar .brand-left img {
@@ -91,7 +90,6 @@
       max-height: 100%;
     }
 
-    /* Slides container */
     .slides {
       flex: 1;
       width: 100%;
@@ -100,7 +98,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2vh 3vw;
+      padding: 1vh 3vw 2vh 3vw;
     }
 
     .slide {
@@ -112,8 +110,7 @@
       display: flex;
       flex-direction: column;
       gap: 2vh;
-      padding: 2.5vh 3vw;
-      padding-top: 1vh;
+      padding: 1vh 3vw 2vh 3vw;
       opacity: 0;
       transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
       pointer-events: none;
@@ -580,10 +577,10 @@
     #lastUpdatedFooter:hover { opacity: 1; }
 
     @media (max-width: 768px) {
-      body { padding-top: 6vh; }
-      .brand-bar { height: 6vh; padding: 0 1.5vw; }
+      body { padding-top: 8dvh; }
+      .brand-bar { height: 8dvh; padding: 0 1.5vw; }
       .brand-bar .brand-left img { height: 80%; }
-      .slide { padding: 1.5vh 2vw; gap: 1.5vh; }
+      .slide { padding: 1vh 2vw; }
       .centre-card { flex-direction: column; padding: 1.5vh; }
       .chart-area { flex: 0 0 40%; width: 40%; }
       .details-area { padding-left: 0; align-items: center; text-align: center; }
@@ -610,7 +607,7 @@
 </head>
 <body>
 
-<!-- Brand Bar – Delta only, minimal -->
+<!-- Brand Bar – Delta only -->
 <div class="brand-bar">
   <div class="brand-left">
     <img src="assets/delta-logo.png" alt="Delta Airlines" onerror="this.style.display='none'" />
@@ -621,6 +618,7 @@
 <div id="lastUpdatedFooter">🕒 Loading...</div>
 
 <script>
+  // (JavaScript remains exactly the same as the last version)
   (async function() {
     const SLIDE_INTERVAL = 15000;
     let currentSlide = 0;
