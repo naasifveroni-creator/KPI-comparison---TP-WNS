@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TP vs WNS | Executive Leaderboard</title>
+  <title>Delta | TP vs WNS Leaderboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,6 +11,7 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    /* ----- LIGHT THEME (keep as is) ----- */
     :root {
       --bg: #f2f5f9;
       --card-bg: rgba(255,255,255,0.85);
@@ -36,6 +37,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      padding-top: 7vh; /* space for fixed brand bar */
     }
     body::before {
       content: '';
@@ -60,6 +62,46 @@
       z-index: 0;
     }
 
+    /* ----- Brand Bar (fixed top, light) ----- */
+    .brand-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6vh;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--badge-border);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2.5vw;
+      z-index: 1000;
+    }
+    .brand-bar .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 1vw;
+    }
+    .brand-bar .brand-left img {
+      height: 3.2vh;
+      width: auto;
+      object-fit: contain;
+    }
+    .brand-bar .brand-right {
+      display: flex;
+      align-items: center;
+      gap: 1vw;
+    }
+    .brand-bar .brand-right img {
+      height: 3.2vh;
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* ----- Slides container ----- */
     .slides {
       flex: 1;
       width: 100%;
@@ -212,7 +254,6 @@
       padding-left: 0.6vw;
       margin-left: 0.2vw;
     }
-    /* Removed timestamp from remote */
 
     .card-row {
       flex: 1;
@@ -283,12 +324,12 @@
       align-items: center;
       gap: 0.6vw;
     }
-    .details-area .centre-name .colour-dot {
-      display: inline-block;
-      width: 1.4vh;
-      height: 1.4vh;
-      border-radius: 50%;
+    .details-area .centre-name .logo-icon {
+      height: 3vh;
+      width: auto;
+      object-fit: contain;
     }
+
     .details-area .main-value {
       font-size: 8vh;
       font-weight: 700;
@@ -525,19 +566,19 @@
       transition: width 0.6s ease;
     }
 
-    /* Timestamp footer (bottom-right) */
+    /* Timestamp footer (light) */
     #lastUpdatedFooter {
       position: fixed;
       bottom: 1.5vh;
       right: 2vw;
       font-size: 1.6vh;
       color: var(--text-muted);
-      background: var(--card-bg);
+      background: var(--remote-bg);
+      backdrop-filter: blur(8px);
       padding: 0.4vh 1.2vw;
       border-radius: 40px;
       border: 1px solid var(--badge-border);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(8px);
       z-index: 998;
       opacity: 0.7;
       transition: opacity 0.3s;
@@ -548,6 +589,9 @@
     #lastUpdatedFooter:hover { opacity: 1; }
 
     @media (max-width: 768px) {
+      body { padding-top: 5vh; }
+      .brand-bar { height: 5vh; padding: 0 1.5vw; }
+      .brand-bar .brand-left img, .brand-bar .brand-right img { height: 2.4vh; }
       .slide { padding: 1.5vh 2vw; gap: 1.5vh; }
       .centre-card { flex-direction: column; padding: 1.5vh; }
       .chart-area { flex: 0 0 40%; width: 40%; }
@@ -562,6 +606,8 @@
     }
 
     @media print {
+      body { padding-top: 0; }
+      .brand-bar { display: none !important; }
       body { background: white !important; }
       .slide { opacity: 1 !important; position: relative !important; display: block !important; }
       .slide:not(.active) { display: none !important; }
@@ -572,6 +618,16 @@
   </style>
 </head>
 <body>
+
+<!-- ===== BRAND BAR (LIGHT) ===== -->
+<div class="brand-bar">
+  <div class="brand-left">
+    <img src="assets/delta-logo.png" alt="Delta Airlines" />
+  </div>
+  <div class="brand-right">
+    <img src="assets/tp-logo.png" alt="Teleperformance" />
+  </div>
+</div>
 
 <div class="slides" id="slidesContainer"></div>
 <div id="lastUpdatedFooter">🕒 Loading...</div>
@@ -645,13 +701,10 @@
       try {
         const date = new Date(data.lastUpdated);
         const formatted = date.toLocaleString('en-ZA', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
+          day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
         });
-        el.textContent = `🕒 Updated: ${formatted}`;
+        const user = data.lastUpdatedBy || 'admin';
+        el.textContent = `🕒 Updated: ${formatted} by ${user}`;
       } catch(e) {
         el.textContent = '🕒 Invalid timestamp';
       }
@@ -670,7 +723,7 @@
       }
     }
 
-    // ----- Build slides (remote without timestamp) -----
+    // ----- Build slides -----
     function buildSlides(data) {
       const container = document.getElementById('slidesContainer');
       container.innerHTML = '';
@@ -741,9 +794,12 @@
           const details = document.createElement('div');
           details.className = 'details-area';
           const dotColour = centre.colour;
+          // Build logo path dynamically
+          const logoPath = `assets/${centre.name.toLowerCase()}-logo.png`;
+
           details.innerHTML = `
             <div class="centre-name">
-              <span class="colour-dot" style="background:${dotColour};"></span>
+              <img src="${logoPath}" alt="${centre.name} logo" class="logo-icon" />
               ${centre.name}
             </div>
             <div class="main-value">
@@ -844,7 +900,7 @@
       updateTimestamp(data);
     }
 
-    // ----- Chart init (unchanged) -----
+    // ----- Chart init -----
     let chartInstances = {};
 
     function initCharts() {
@@ -938,7 +994,7 @@
       updateSummary();
     }
 
-    // ----- Update metric text (unchanged) -----
+    // ----- Update metric text -----
     function updateMetricText(item) {
       const displayVal = item.current + (item.unit === '%' ? '%' : '');
       if (item.valueEl) item.valueEl.textContent = displayVal;
@@ -995,7 +1051,7 @@
       }
     }
 
-    // ----- Update summary (unchanged) -----
+    // ----- Update summary -----
     function updateSummary() {
       const metricKeys = ['SIS', 'IFSR', 'CHT'];
       const centres = allData.centres;
