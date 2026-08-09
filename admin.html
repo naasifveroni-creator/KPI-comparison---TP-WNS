@@ -117,7 +117,7 @@
     .upload-area .preview-table th, .upload-area .preview-table td { border: 1px solid #e2e8f0; padding: 0.4rem 0.6rem; text-align: left; }
     .upload-area .preview-table th { background: #f1f5f9; font-weight: 600; }
 
-    /* Login overlay (unchanged) */
+    /* Login overlay */
     #loginOverlay {
       position: fixed;
       top: 0;
@@ -387,6 +387,17 @@
           current: parseFloat(cur.value) || 0,
           previous: parseFloat(prev.value) || 0
         };
+        // Preserve history from currentData if it exists
+        if (currentData) {
+          const found = currentData.centres.find(c => c.name === name);
+          if (found && found.metrics[metric].history) {
+            metrics[metric].history = found.metrics[metric].history;
+          } else {
+            metrics[metric].history = [];
+          }
+        } else {
+          metrics[metric].history = [];
+        }
       });
       let colour = defaultColours[name];
       if (currentData) {
@@ -420,9 +431,10 @@
     }
   }
 
-  // ---- Publish to GitHub ----
+  // ---- Publish to GitHub (with timestamp) ----
   async function publishData() {
     const data = collectData();
+    data.lastUpdated = new Date().toISOString(); // <-- TIMESTAMP ADDED
     const jsonStr = JSON.stringify(data, null, 2);
 
     let token = GITHUB_TOKEN;
@@ -481,28 +493,12 @@
     }
   }
 
-  // ---- Excel/CSV Parser ----
+  // ---- Excel/CSV Parser (SSS only) ----
   function parseFileData(workbook) {
-    // Assume first sheet
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
-    // data is an array of arrays (rows)
 
-    // Find row indices for "TP" and "WNS"
-    let tpRow = -1, wnsRow = -1;
-    let sssRowOffset = -1; // we'll find "SSS" under each
-    // Also need to find the column indices for months – they are in the first row after the "TP"/"WNS" headings?
-    // Actually from sample: 
-    // Row 1: [ '', '', 'TP', '', 'July', 'August' ] (so columns: A,B,C,D,E,F)
-    // Row 2: [ '', '', 'SSS', 'CHT', 823, 829 ]
-    // So we need to find the row where col C is "TP" and then below it find "SSS", then find rows with metric names.
-
-    // We'll build a structure: for each centre, find the SSS block and extract metrics.
-
-    // First, determine month columns: they are in row 1 (index 0) after col D? Actually row 0 has empty cells until col D? Let's inspect.
-    // We'll scan the first row for non-empty strings that look like month names (e.g., "July", "August").
-    // Then we'll collect those column indices and names.
-
+    // Find month columns
     const monthCols = [];
     if (data.length > 0) {
       const headerRow = data[0];
@@ -512,13 +508,6 @@
         }
       });
     }
-
-    // Now find centre blocks.
-    // We'll scan rows for first column (index 0) containing "TP" or "WNS" (case-insensitive) and then look for "SSS" in col C (index 2).
-    // Actually sample: "TP" is in col C (index 2), "SSS" is below it in col C (index 2) as well.
-    // Simpler: we'll search for rows where cell at index 2 (col C) is "TP" or "WNS".
-    // Then, starting from that row+1, find the row where cell at index 2 is "SSS".
-    // Then, from that row+1, scan for rows where cell at index 3 (col D) is a metric name (CHT, IFSR, Phone SIS, etc.) and extract the month values.
 
     const centres = ['TP', 'WNS'];
     const extracted = {};
@@ -544,33 +533,27 @@
       }
       if (sssRowIdx === -1) return;
 
-      // Now scan rows below sssRowIdx for metrics
-      // The metric rows have metric name in col D (index 3) and values in month columns.
+      // Scan rows below sssRowIdx for metrics
       const metrics = {};
       for (let i = sssRowIdx + 1; i < data.length; i++) {
         const row = data[i];
         const metricName = row[3] ? row[3].toString().trim() : '';
-        if (!metricName) break; // assume end of block
+        if (!metricName) break;
 
-        // Map metric names to our keys
         let key = null;
         if (metricName.toUpperCase() === 'CHT') key = 'CHT';
         else if (metricName.toUpperCase() === 'IFSR') key = 'IFSR';
         else if (metricName.toUpperCase() === 'PHONE SIS') key = 'SIS';
         else continue;
 
-        // Extract values from month columns
         const values = monthCols.map(mc => {
           const val = row[mc.col];
           return parseFloat(val) || 0;
         });
 
-        // Filter out zeros? Keep all.
         metrics[key] = values;
       }
 
-      // We now have values for each month for this centre's metrics.
-      // We need to set current = latest month (last in array), previous = second last, history = all.
       const result = {};
       for (const [key, vals] of Object.entries(metrics)) {
         if (vals.length === 0) continue;
@@ -595,9 +578,6 @@
       return;
     }
 
-    // Update the form fields
-    // We'll load current data first (if any) to preserve targets and colours, then override metrics.
-    // But we'll just directly set the input fields.
     ['TP', 'WNS'].forEach(centre => {
       const metrics = extracted[centre];
       ['SIS', 'IFSR', 'CHT'].forEach(metric => {
@@ -610,13 +590,7 @@
       });
     });
 
-    // Also update the history arrays in currentData? We'll store them in a hidden way or we can add them to currentData and then publish.
-    // But the current data object (currentData) will be used when publishing, and we'll include history.
-    // Since we're only updating the form fields, we need to update the currentData object as well before publishing.
-    // We'll do that in the collectData function – it already reads from form fields, but we need to include history.
-    // We'll store the history in a global variable and merge it during collectData.
-    // For simplicity, we'll just store the parsed history in a separate variable and in collectData, we'll fetch it from there.
-    // But easier: we can update currentData.centres directly.
+    // Update history in currentData
     if (currentData) {
       ['TP', 'WNS'].forEach(centre => {
         const centreObj = currentData.centres.find(c => c.name === centre);
@@ -661,7 +635,6 @@
         previewTable.innerHTML = html;
         applyFileBtn.style.display = 'inline-block';
 
-        // Store parsed data for apply
         window._parsedFile = parsed;
       } catch(err) {
         setStatus('❌ Failed to parse file: ' + err.message, true);
@@ -693,9 +666,6 @@
   applyFileBtn.addEventListener('click', function() {
     if (window._parsedFile) {
       applyParsedData(window._parsedFile);
-      // Optionally, also load the data to refresh forms? The applyParsedData already updates inputs.
-      // Also need to update currentData's history.
-      // We already updated currentData in applyParsedData.
     }
   });
 
@@ -703,34 +673,7 @@
   document.getElementById('loadBtn').addEventListener('click', loadData);
   document.getElementById('publishBtn').addEventListener('click', publishData);
 
-  // If already logged in, load data (done in showAdmin)
-  // Also, we need to ensure that collectData includes history from currentData when publishing.
-  // We'll override collectData to also include history from currentData if it exists.
-  const originalCollect = collectData;
-  collectData = function() {
-    const data = originalCollect();
-    // Merge history from currentData into each centre/metric
-    if (currentData) {
-      data.centres.forEach((c, idx) => {
-        const orig = currentData.centres.find(oc => oc.name === c.name);
-        if (orig) {
-          ['SIS','IFSR','CHT'].forEach(m => {
-            if (orig.metrics[m].history) {
-              c.metrics[m].history = orig.metrics[m].history;
-            }
-          });
-        }
-      });
-    }
-    return data;
-  };
-
-  // Also when loading, we need to populate history into currentData.
-  // The loadData function already builds forms and sets currentData.
-  // We'll add a step to set history from the loaded data.
-  // Already done in loadData.
-
-  console.log('Admin ready. Upload Excel/CSV to auto-fill data.');
+  console.log('Admin ready. Upload Excel/CSV to auto-fill data. Timestamp will be added on publish.');
 </script>
 </body>
 </html>
