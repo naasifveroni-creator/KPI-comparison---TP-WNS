@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
   <style>
-    /* (All styles exactly as before – unchanged) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
@@ -207,13 +206,13 @@
       color: #3b82f6;
       background: var(--badge-bg);
     }
-    /* NEW: Fullscreen button */
     .metric-header .remote-inline .fullscreen-btn {
       font-size: 1.8vh;
       border-left: 1px solid var(--badge-border);
       padding-left: 0.6vw;
       margin-left: 0.2vw;
     }
+    /* Removed timestamp from remote */
 
     .card-row {
       flex: 1;
@@ -392,7 +391,7 @@
       font-weight: 600;
     }
 
-    /* Summary vertical (unchanged) */
+    /* Summary vertical */
     .summary-grid-vertical {
       flex: 1;
       display: flex;
@@ -526,6 +525,28 @@
       transition: width 0.6s ease;
     }
 
+    /* Timestamp footer (bottom-right) */
+    #lastUpdatedFooter {
+      position: fixed;
+      bottom: 1.5vh;
+      right: 2vw;
+      font-size: 1.6vh;
+      color: var(--text-muted);
+      background: var(--card-bg);
+      padding: 0.4vh 1.2vw;
+      border-radius: 40px;
+      border: 1px solid var(--badge-border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      z-index: 998;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      font-weight: 400;
+      letter-spacing: 0.2px;
+    }
+    #lastUpdatedFooter:hover { opacity: 1; }
+
     @media (max-width: 768px) {
       .slide { padding: 1.5vh 2vw; gap: 1.5vh; }
       .centre-card { flex-direction: column; padding: 1.5vh; }
@@ -537,6 +558,7 @@
       .metric-header .remote-inline .admin-link { border-left: none; padding-left: 0; margin-left: 0; }
       .summary-row-vertical .values { gap: 0.8vw; }
       .summary-row-vertical .bar-container { display: none; }
+      #lastUpdatedFooter { bottom: 1vh; right: 2vw; font-size: 1.4vh; padding: 0.2vh 1.5vw; }
     }
 
     @media print {
@@ -545,12 +567,14 @@
       .slide:not(.active) { display: none !important; }
       .remote-inline { display: none !important; }
       .centre-card, .summary-card-vertical { break-inside: avoid; }
+      #lastUpdatedFooter { display: none !important; }
     }
   </style>
 </head>
 <body>
 
 <div class="slides" id="slidesContainer"></div>
+<div id="lastUpdatedFooter">🕒 Loading...</div>
 
 <script>
   (async function() {
@@ -561,7 +585,7 @@
     let isPaused = false;
     let allData = null;
 
-    // ----- Helpers (unchanged) -----
+    // ----- Helpers -----
     function getStatusClass(value, target, isHigher) {
       if (isHigher) {
         if (value >= target) return 'on-target';
@@ -610,6 +634,29 @@
       return `${emoji} ${direction} (${sign}${pctChange.toFixed(1)}%)`;
     }
 
+    // ----- Timestamp update (footer) -----
+    function updateTimestamp(data) {
+      const el = document.getElementById('lastUpdatedFooter');
+      if (!el) return;
+      if (!data || !data.lastUpdated) {
+        el.textContent = '🕒 Not yet updated';
+        return;
+      }
+      try {
+        const date = new Date(data.lastUpdated);
+        const formatted = date.toLocaleString('en-ZA', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        el.textContent = `🕒 Updated: ${formatted}`;
+      } catch(e) {
+        el.textContent = '🕒 Invalid timestamp';
+      }
+    }
+
     // ----- Fetch data -----
     async function fetchData() {
       try {
@@ -623,7 +670,7 @@
       }
     }
 
-    // ----- Build slides (modified remote to include fullscreen button) -----
+    // ----- Build slides (remote without timestamp) -----
     function buildSlides(data) {
       const container = document.getElementById('slidesContainer');
       container.innerHTML = '';
@@ -660,7 +707,7 @@
         `;
       }
 
-      // ----- Metric slides (0,1,2) -----
+      // ----- Metric slides -----
       for (let mi = 0; mi < 3; mi++) {
         const metricKey = metricKeys[mi];
         const slide = document.createElement('div');
@@ -751,7 +798,7 @@
         container.appendChild(slide);
       }
 
-      // ----- SUMMARY SLIDE (index 3) -----
+      // ----- Summary slide -----
       const summarySlide = document.createElement('div');
       summarySlide.className = 'slide';
       summarySlide.dataset.slideType = 'summary';
@@ -793,6 +840,8 @@
 
       summarySlide.appendChild(summaryGrid);
       container.appendChild(summarySlide);
+
+      updateTimestamp(data);
     }
 
     // ----- Chart init (unchanged) -----
@@ -889,7 +938,7 @@
       updateSummary();
     }
 
-    // ----- Update functions (unchanged) -----
+    // ----- Update metric text (unchanged) -----
     function updateMetricText(item) {
       const displayVal = item.current + (item.unit === '%' ? '%' : '');
       if (item.valueEl) item.valueEl.textContent = displayVal;
@@ -946,6 +995,7 @@
       }
     }
 
+    // ----- Update summary (unchanged) -----
     function updateSummary() {
       const metricKeys = ['SIS', 'IFSR', 'CHT'];
       const centres = allData.centres;
@@ -1016,6 +1066,8 @@
       const newData = await fetchData();
       if (!newData) return;
       allData = newData;
+      updateTimestamp(allData);
+
       slidesData.forEach((item) => {
         if (item.slideIndex === 3) {
           item.target = allData.targets[item.metricKey];
@@ -1087,7 +1139,7 @@
       if (index >= slides.length) index = slides.length - 1;
       currentSlide = index;
       slides.forEach((s, i) => s.classList.toggle('active', i === index));
-      
+
       document.querySelectorAll('.remote-inline').forEach((remote, idx) => {
         const dots = remote.querySelectorAll('.dot');
         dots.forEach((d, i) => {
@@ -1118,7 +1170,7 @@
       else { clearInterval(intervalId); intervalId = null; isPaused = true; document.querySelectorAll('.pause-btn').forEach(btn => btn.textContent = '▶'); }
     }
 
-    // ----- Fullscreen function -----
+    // ----- Fullscreen -----
     function toggleFullscreen() {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(err => {
@@ -1179,6 +1231,8 @@
     }
     allData = initialData;
     buildSlides(initialData);
+    updateTimestamp(initialData);
+
     setTimeout(() => {
       initCharts();
       goToSlide(0);
