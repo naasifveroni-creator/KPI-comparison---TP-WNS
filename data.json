@@ -1,7 +1,7 @@
 {
   "targets": {
-    "SIS": 86.30,
-    "IFSR": 87.00,
+    "SIS": 86.3,
+    "IFSR": 87,
     "CHT": 580
   },
   "centres": [
@@ -12,17 +12,35 @@
         "SIS": {
           "current": 78,
           "previous": 77,
-          "history": [76, 77, 78, 77, 78]
+          "history": [
+            76,
+            77,
+            78,
+            77,
+            78
+          ]
         },
         "IFSR": {
           "current": 85,
-          "previous": 86,
-          "history": [86, 87, 86, 86, 85]
+          "previous": 85,
+          "history": [
+            86,
+            87,
+            86,
+            86,
+            85
+          ]
         },
         "CHT": {
           "current": 829,
-          "previous": 823,
-          "history": [868, 859, 822, 823, 829]
+          "previous": 847,
+          "history": [
+            868,
+            859,
+            822,
+            823,
+            829
+          ]
         }
       }
     },
@@ -33,18 +51,133 @@
         "SIS": {
           "current": 85,
           "previous": 83,
-          "history": [82, 83, 84, 83, 85]
+          "history": [
+            82,
+            83,
+            84,
+            83,
+            85
+          ]
         },
         "IFSR": {
           "current": 79,
           "previous": 79,
-          "history": [78, 79, 79, 79, 79]
+          "history": [
+            78,
+            79,
+            79,
+            79,
+            79
+          ]
         },
         "CHT": {
           "current": 906,
-          "previous": 904,
-          "history": [920, 910, 905, 904, 906]
+          "previous": 924,
+          "history": [
+            920,
+            910,
+            905,
+            904,
+            906
+          ]
         }
+      }
+    }
+  ],
+  "lastUpdated": "2026-08-11T22:50:38.093Z",
+  "lastUpdatedBy": "admin",
+  "historyLog": [
+    {
+      "timestamp": "2026-08-11T22:50:38.093Z",
+      "user": "admin",
+      "snapshot": {
+        "targets": {
+          "SIS": 86.3,
+          "IFSR": 87,
+          "CHT": 580
+        },
+        "centres": [
+          {
+            "name": "TP",
+            "colour": "#3b82f6",
+            "metrics": {
+              "SIS": {
+                "current": 78,
+                "previous": 77,
+                "history": [
+                  76,
+                  77,
+                  78,
+                  77,
+                  78
+                ]
+              },
+              "IFSR": {
+                "current": 85,
+                "previous": 85,
+                "history": [
+                  86,
+                  87,
+                  86,
+                  86,
+                  85
+                ]
+              },
+              "CHT": {
+                "current": 829,
+                "previous": 847,
+                "history": [
+                  868,
+                  859,
+                  822,
+                  823,
+                  829
+                ]
+              }
+            }
+          },
+          {
+            "name": "WNS",
+            "colour": "#f59e0b",
+            "metrics": {
+              "SIS": {
+                "current": 85,
+                "previous": 83,
+                "history": [
+                  82,
+                  83,
+                  84,
+                  83,
+                  85
+                ]
+              },
+              "IFSR": {
+                "current": 79,
+                "previous": 79,
+                "history": [
+                  78,
+                  79,
+                  79,
+                  79,
+                  79
+                ]
+              },
+              "CHT": {
+                "current": 906,
+                "previous": 924,
+                "history": [
+                  920,
+                  910,
+                  905,
+                  904,
+                  906
+                ]
+              }
+            }
+          }
+        ],
+        "lastUpdated": "2026-08-11T22:50:38.093Z",
+        "lastUpdatedBy": "admin"
       }
     }
   ]
