@@ -22,7 +22,7 @@
         },
         "IFSR": {
           "current": 85,
-          "previous": 86,
+          "previous": 85,
           "history": [
             86,
             87,
@@ -72,7 +72,7 @@
         },
         "CHT": {
           "current": 924,
-          "previous": 904,
+          "previous": 924,
           "history": [
             920,
             910,
@@ -84,11 +84,11 @@
       }
     }
   ],
-  "lastUpdated": "2026-08-11T22:57:12.253Z",
+  "lastUpdated": "2026-08-11T22:58:03.132Z",
   "lastUpdatedBy": "admin",
   "historyLog": [
     {
-      "timestamp": "2026-08-11T22:57:12.253Z",
+      "timestamp": "2026-08-11T22:58:03.132Z",
       "user": "admin",
       "snapshot": {
         "targets": {
@@ -114,7 +114,7 @@
               },
               "IFSR": {
                 "current": 85,
-                "previous": 86,
+                "previous": 85,
                 "history": [
                   86,
                   87,
@@ -164,7 +164,7 @@
               },
               "CHT": {
                 "current": 924,
-                "previous": 904,
+                "previous": 924,
                 "history": [
                   920,
                   910,
@@ -176,7 +176,7 @@
             }
           }
         ],
-        "lastUpdated": "2026-08-11T22:57:12.253Z",
+        "lastUpdated": "2026-08-11T22:58:03.132Z",
         "lastUpdatedBy": "admin"
       }
     }
