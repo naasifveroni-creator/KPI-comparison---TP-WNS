@@ -36,7 +36,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      padding-top: 16dvh; /* matches brand bar height */
+      padding-top: 16dvh;
     }
     body::before {
       content: '';
@@ -61,7 +61,6 @@
       z-index: 0;
     }
 
-    /* Brand Bar – 16dvh tall, logo fills it */
     .brand-bar {
       position: fixed;
       top: 0;
@@ -279,8 +278,10 @@
     .centre-card.tp { --brand-colour: #3b82f6; }
     .centre-card.wns { --brand-colour: #f59e0b; }
 
+    /* FIX: Chart area – better proportions for wide screens */
     .chart-area {
-      flex: 0 0 25%;
+      flex: 0 0 30%;
+      max-width: 30%;
       aspect-ratio: 1/1;
       max-height: 100%;
       position: relative;
@@ -420,7 +421,6 @@
       font-weight: 600;
     }
 
-    /* Summary vertical */
     .summary-grid-vertical {
       flex: 1;
       display: flex;
@@ -554,7 +554,6 @@
       transition: width 0.6s ease;
     }
 
-    /* Timestamp footer */
     #lastUpdatedFooter {
       position: fixed;
       bottom: 1.5vh;
@@ -577,12 +576,12 @@
     #lastUpdatedFooter:hover { opacity: 1; }
 
     @media (max-width: 768px) {
-      body { padding-top: 12dvh; } /* slightly smaller on mobile */
+      body { padding-top: 12dvh; }
       .brand-bar { height: 12dvh; padding: 0 1.5vw; }
       .brand-bar .brand-left img { height: 80%; }
       .slide { padding: 1vh 2vw; }
       .centre-card { flex-direction: column; padding: 1.5vh; }
-      .chart-area { flex: 0 0 40%; width: 40%; }
+      .chart-area { flex: 0 0 40%; width: 40%; max-width: 40%; }
       .details-area { padding-left: 0; align-items: center; text-align: center; }
       .details-area .main-value { font-size: 5vh; flex-wrap: wrap; justify-content: center; }
       .metric-header h2 { font-size: 2.8vh; }
@@ -591,6 +590,13 @@
       .summary-row-vertical .values { gap: 0.8vw; }
       .summary-row-vertical .bar-container { display: none; }
       #lastUpdatedFooter { bottom: 1vh; right: 2vw; font-size: 1.4vh; padding: 0.2vh 1.5vw; }
+    }
+
+    /* Optional: large screen tweaks */
+    @media (min-width: 1400px) {
+      .centre-card { padding: 1.2vh 2vw; }
+      .details-area .main-value { font-size: 7vh; }
+      .chart-area { flex: 0 0 25%; max-width: 25%; }
     }
 
     @media print {
@@ -618,7 +624,7 @@
 <div id="lastUpdatedFooter">🕒 Loading...</div>
 
 <script>
-  // (JavaScript is identical to the previous working version – no changes needed)
+  // (JavaScript unchanged – the previous working version stays exactly the same)
   (async function() {
     const SLIDE_INTERVAL = 15000;
     let currentSlide = 0;
@@ -840,7 +846,6 @@
         container.appendChild(slide);
       }
 
-      // Summary slide
       const summarySlide = document.createElement('div');
       summarySlide.className = 'slide';
       summarySlide.dataset.slideType = 'summary';
